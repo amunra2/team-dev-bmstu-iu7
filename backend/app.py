@@ -5,6 +5,7 @@ from flask_migrate import Migrate
 
 from database import db, init_db
 from models.classroom import Classroom
+from models.schedule_class import ScheduleClass
 
 app = Flask(__name__)
 init_db(app)
