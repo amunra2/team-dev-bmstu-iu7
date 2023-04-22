@@ -16,6 +16,7 @@ jobs:
       - name: flake8 Lint
         uses: py-actions/flake8@v2
         with:
+          update-pip: true
           args: "--config cfg/linter.cfg"
           plugins: >-
             flake8-bugbear
