@@ -5,22 +5,125 @@ import os
 from dotenv import load_dotenv
 
 import telebot as tb
+import telebot.types as tbt
+
+PARSE_MODE = 'MarkdownV2'
+KEY=0
+VALUE=1
 
 
 class TelegramBotEmptyAudienceBMSTU:
-    def __init__(self, bot_messages_json: dict):
+    def __init__(self, bot_messages_json: dict, buildings_json: dict, 
+                 lessons_json: dict, levels_json: dict):
         self.bot = tb.TeleBot(os.getenv("TOKEN"))
-        self.bot_messages = bot_messages_json
 
-        @self.bot.message_handler(commands=['start'])
-        def init_command_handler(message: tb.types.Message):
+        self.bot_messages = bot_messages_json
+        self.buildings = buildings_json
+        self.lessons = lessons_json
+        self.levels = levels_json
+
+        self.data: dict = {}
+
+        @self.bot.message_handler(commands=['start', 'help'])
+        def init_command_handler(message: tbt.Message):
             self.init_command_process(message)
 
-        # @self.bot.message_handler(content_types=['text'])
-        # def work(message: tb.types.Message):
+        @self.bot.message_handler(commands=['find_empty'])
+        def find_empty_audience_handler(message: tbt.Message):
+            self.data.clear()
+            self.data.update({"MODE": "EMPTY_AUDIENCE", "USER_ID": message.from_user.id})
 
-    def init_command_process(self, message: tb.types.Message):
-        self.bot.send_message(message.from_user.id, self.bot_messages["HI"])
+            self.select_building(self.data["MODE"], self.data["USER_ID"])
+
+        @self.bot.callback_query_handler(func=lambda call: call.data.startswith("BUILDING"))
+        def save_building_handler(call: tbt.CallbackQuery):
+            dataString = call.data.split(":")
+            self.data.update({dataString[KEY]: dataString[VALUE]})
+
+            self.select_lesson(self.data["MODE"], self.data["USER_ID"])
+
+        @self.bot.callback_query_handler(func=lambda call: call.data.startswith("LESSON"))
+        def save_lesson_handler(call: tbt.CallbackQuery):
+            dataString = call.data.split(":")
+            self.data.update({dataString[KEY]: dataString[VALUE]})
+
+            if (self.data["MODE"] == "EMPTY_AUDIENCE"):
+                self.select_level(self.data["MODE"], self.data["USER_ID"])
+            else:
+                pass
+
+        @self.bot.callback_query_handler(func=lambda call: call.data.startswith("LEVEL"))
+        def save_level_handler(call: tbt.CallbackQuery):
+            dataString = call.data.split(":")
+            self.data.update({dataString[KEY]: dataString[VALUE]})
+
+            string = "{\n" + \
+                     "".join([f'  {key}: {value},\n' for key,value in self.data.items()]) + \
+                     "}"
+            
+            logger.info(string.replace("\n", "").replace("  ", " "))
+            
+            self.bot.send_message(self.data["USER_ID"],
+                              f"{self.bot_messages[self.data['MODE']]} `{string}`",
+                              parse_mode=PARSE_MODE)
+
+            
+        logger.info("Бот запущен!")
+
+
+    def select_building(self, command_text: str, user_id: int):
+        keyboard = tbt.InlineKeyboardMarkup();
+    
+        for key,value in self.buildings.items():
+            button = tbt.InlineKeyboardButton(text=value,
+                                              callback_data=f"BUILDING:{key}")
+            keyboard.add(button)
+
+        self.bot.send_message(user_id,
+                              self.bot_messages[command_text] +
+                              self.bot_messages["CHOOSE_BUILDING"],
+                              parse_mode=PARSE_MODE,
+                              reply_markup=keyboard)
+
+        
+    def select_lesson(self, command_text: str, user_id: int):
+        keyboard = tbt.InlineKeyboardMarkup();
+    
+        for key,value in self.lessons.items():
+            button = tbt.InlineKeyboardButton(text=value,
+                                              callback_data=f"LESSON:{key}")
+            keyboard.add(button)
+
+        self.bot.send_message(user_id,
+                              self.bot_messages[command_text] +
+                              self.bot_messages["CHOOSE_LESSON"],
+                              parse_mode=PARSE_MODE,
+                              reply_markup=keyboard)
+        
+    
+    def select_level(self, command_text: str, user_id: int):
+        keyboard = tbt.InlineKeyboardMarkup();
+        levelsNum = self.levels[self.data["BUILDING"]]
+    
+        for levelNum in range(levelsNum):
+            button = tbt.InlineKeyboardButton(text=f"Этаж {levelNum + 1}",
+                                              callback_data=f"LEVEL:{levelNum + 1}")
+            keyboard.add(button)
+
+        self.bot.send_message(user_id,
+                              self.bot_messages[command_text] +
+                              self.bot_messages["CHOOSE_LEVEL"],
+                              parse_mode=PARSE_MODE,
+                              reply_markup=keyboard)
+
+
+
+    def init_command_process(self, message: tbt.Message):
+        self.bot.send_message(message.from_user.id,
+                              self.bot_messages["HI"] +
+                              self.bot_messages["COMMAND_FIND_EMPTY"] +
+                              self.bot_messages["COMMAND_IS_EMPTY"],
+                              parse_mode=PARSE_MODE)
 
     def run(self):
         self.bot.infinity_polling()
@@ -40,29 +143,37 @@ def get_logger(log_level: str) -> logging.Logger:
     return logger
 
 
-def get_messages_from_json():
+def get_data_from_json(file_path: str):
     try:
-        with open(os.getenv("MESSAGES_FILE_PATH"), 'r') as messages_file:
-            bot_messages_json: dict = json.load(messages_file)
+        with open(file_path, 'r') as file:
+            data_json: dict = json.load(file)
     except FileNotFoundError:
-        logger.critical('Неверно указан путь до файла' +
-                        f'с сообщениями бота: {os.getenv("MESSAGES_FILE_PATH")}')
+        logger.critical(f'Неверно указан путь до файла {file_path}')
         return None
     except json.decoder.JSONDecodeError:
-        logger.critical('Файл с сообщениями бота поврежден')
+        logger.critical('Файл поврежден')
         return None
     except Exception as exception:
         logger.critical(str(exception))
         return None
 
-    return bot_messages_json
+    return data_json
 
 
 if __name__ == "__main__":
     load_dotenv()  # должен быть файл .env, смотреть .env.example
     logger = get_logger(os.getenv("LOG_LEVEL"))
-    bot_messages_json = get_messages_from_json()
+    bot_messages_json = get_data_from_json(os.getenv("MESSAGES_FILE_PATH"))
+    buildings_json = get_data_from_json(os.getenv("BUILDINGS_FILE_PATH"))
+    lessons_json = get_data_from_json(os.getenv("LESSONS_FILE_PATH"))
+    levels_json = get_data_from_json(os.getenv("LEVELS_FILE_PATH"))
 
-    if (bot_messages_json is not None):
-        bot = TelegramBotEmptyAudienceBMSTU(bot_messages_json)
+    if ((bot_messages_json is not None) and
+        (buildings_json is not None) and
+        (lessons_json is not None) and
+        (levels_json is not None)):
+        bot = TelegramBotEmptyAudienceBMSTU(bot_messages_json,
+                                            buildings_json,
+                                            lessons_json,
+                                            levels_json)
         bot.run()
