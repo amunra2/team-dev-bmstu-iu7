@@ -56,7 +56,7 @@ class TelegramBotEmptyAudienceBMSTU:
             dataString = call.data.split(":")
             self.data.update({dataString[KEY]: dataString[VALUE]})
 
-            if (self.data["MODE"] == "EMPTY_AUDIENCE"):
+            if (self.data["MODE"] == "FIND_EMPTY_AUDIENCE"):
                 self.select_level(self.data["MODE"], self.data["USER_ID"])
             else:
                 self.select_audience(call, self.data["MODE"])
