@@ -22,7 +22,9 @@ class TelegramBotEmptyAudienceBMSTU:
         self.lessons = lessons_json
         self.levels = levels_json
 
-        self.data: dict = {}
+        self.data: dict = {} # делится между всеми? как решать?
+        # по айди создавать словарь для каждого?
+        # и раз в какое-то время очищать?
 
         @self.bot.message_handler(commands=['start', 'help'])
         def init_command_handler(message: tbt.Message):
@@ -31,7 +33,14 @@ class TelegramBotEmptyAudienceBMSTU:
         @self.bot.message_handler(commands=['find_empty'])
         def find_empty_audience_handler(message: tbt.Message):
             self.data.clear()
-            self.data.update({"MODE": "EMPTY_AUDIENCE", "USER_ID": message.from_user.id})
+            self.data.update({"MODE": "FIND_EMPTY_AUDIENCE", "USER_ID": message.from_user.id})
+
+            self.select_building(self.data["MODE"], self.data["USER_ID"])
+
+        @self.bot.message_handler(commands=['is_empty'])
+        def find_empty_audience_handler(message: tbt.Message):
+            self.data.clear()
+            self.data.update({"MODE": "IS_EMPTY_AUDIENCE", "USER_ID": message.from_user.id})
 
             self.select_building(self.data["MODE"], self.data["USER_ID"])
 
@@ -50,7 +59,7 @@ class TelegramBotEmptyAudienceBMSTU:
             if (self.data["MODE"] == "EMPTY_AUDIENCE"):
                 self.select_level(self.data["MODE"], self.data["USER_ID"])
             else:
-                pass
+                self.select_audience(call, self.data["MODE"])
 
         @self.bot.callback_query_handler(func=lambda call: call.data.startswith("LEVEL"))
         def save_level_handler(call: tbt.CallbackQuery):
@@ -60,7 +69,6 @@ class TelegramBotEmptyAudienceBMSTU:
             string = "{\n" + \
                      "".join([f'  {key}: {value},\n' for key,value in self.data.items()]) + \
                      "}"
-            
             logger.info(string.replace("\n", "").replace("  ", " "))
             
             self.bot.send_message(self.data["USER_ID"],
@@ -115,7 +123,28 @@ class TelegramBotEmptyAudienceBMSTU:
                               self.bot_messages["CHOOSE_LEVEL"],
                               parse_mode=PARSE_MODE,
                               reply_markup=keyboard)
+        
 
+    def select_audience(self, call: tbt.CallbackQuery, command_text: str):
+        self.bot.send_message(call.message.chat.id,
+                              self.bot_messages[command_text] +
+                              self.bot_messages["CHOOSE_AUDIENCE"],
+                              parse_mode=PARSE_MODE)
+        
+        self.bot.register_next_step_handler(call.message, self.save_audience)
+
+
+    def save_audience(self, message: tbt.Message):
+        self.data.update({"AUDIENCE": message.text})
+
+        string = "{\n" + \
+                 "".join([f'  {key}: {value},\n' for key,value in self.data.items()]) + \
+                 "}"
+        logger.info(string.replace("\n", "").replace("  ", " "))
+        
+        self.bot.send_message(self.data["USER_ID"],
+                              f"{self.bot_messages[self.data['MODE']]} `{string}`",
+                              parse_mode=PARSE_MODE)
 
 
     def init_command_process(self, message: tbt.Message):
