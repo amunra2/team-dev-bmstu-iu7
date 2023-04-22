@@ -1,6 +1,6 @@
 from database import db
 
-class Class(db.Model):
+class ScheduleClass(db.Model):
     __tablename__ = "classes"
 
     class_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -10,7 +10,7 @@ class Class(db.Model):
 
     def __repr__(self):
         return (
-            f"Class\n"
+            f"Shedule Class\n"
             f"id:   {self.class_id}\n"
             f"week: {self.week}\n"
             f"day:  {self.day}\n"
