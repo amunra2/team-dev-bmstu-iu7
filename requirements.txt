@@ -11,3 +11,9 @@ pycodestyle
 # Backend
 flask
 waitress
+
+# Telegram Bot Control
+pytelegrambotapi
+
+# .end variables
+python-dotenv
