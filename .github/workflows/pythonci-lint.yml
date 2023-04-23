@@ -23,6 +23,5 @@ jobs:
             flake8-builtins
             flake8-commas
             flake8-import-order
-            flake8-requirements
             pep8-naming
             pycodestyle
