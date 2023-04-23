@@ -10,6 +10,9 @@ pycodestyle
 
 # Backend
 flask
+flask_migrate
+flask_sqlalchemy
+sqlalchemy
 waitress
 
 # Telegram Bot Control
