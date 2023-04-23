@@ -80,21 +80,19 @@ class TelegramBotEmptyAudienceBMSTU:
             data_string = call.data.split(":")
             self.data_users[user_id].update({data_string[KEY]: data_string[VALUE]})
 
+            items = self.data_users[user_id].items()
             string = "{\n" + \
-                     "".join([f'  {key}: {value},\n' for key,value in self.data_users[user_id].items()]) + \
+                     "".join([f'  {key}: {value},\n' for key, value in items]) + \
                      "}"
             logger.info(string.replace("\n", "").replace("  ", " "))
 
-            print(self.data_users)
-
+            mode = self.data_users[user_id]['MODE']
             self.bot.send_message(user_id,
-                              f"{self.bot_messages[self.data_users[user_id]['MODE']]} `{string}`",
-                              parse_mode=PARSE_MODE)
+                                  f"{self.bot_messages[mode]} `{string}`",
+                                  parse_mode=PARSE_MODE)
             self.data_users.pop(user_id)
-            print(self.data_users)
-            
-        logger.info("Бот запущен!")
 
+        logger.info("Бот запущен!")
 
     def is_user_comebacked(self, user_id: int, stage: str):
         if (self.data_users.get(user_id) is None):
@@ -104,16 +102,15 @@ class TelegramBotEmptyAudienceBMSTU:
             return True
         elif (self.data_users[user_id].get(stage) is not None):
             self.bot.send_message(user_id,
-                                    self.bot_messages["CHOOSE_FAIL"],
-                                    parse_mode=PARSE_MODE)
+                                  self.bot_messages["CHOOSE_FAIL"],
+                                  parse_mode=PARSE_MODE)
             return True
         return False
 
-
     def select_building(self, command_text: str, user_id: int):
-        keyboard = tbt.InlineKeyboardMarkup();
-    
-        for key,value in self.buildings.items():
+        keyboard = tbt.InlineKeyboardMarkup()
+
+        for key, value in self.buildings.items():
             button = tbt.InlineKeyboardButton(text=value,
                                               callback_data=f"BUILDING:{key}")
             keyboard.add(button)
@@ -124,11 +121,10 @@ class TelegramBotEmptyAudienceBMSTU:
                               parse_mode=PARSE_MODE,
                               reply_markup=keyboard)
 
-        
     def select_lesson(self, command_text: str, user_id: int):
-        keyboard = tbt.InlineKeyboardMarkup();
-    
-        for key,value in self.lessons.items():
+        keyboard = tbt.InlineKeyboardMarkup()
+
+        for key, value in self.lessons.items():
             button = tbt.InlineKeyboardButton(text=value,
                                               callback_data=f"LESSON:{key}")
             keyboard.add(button)
@@ -138,15 +134,14 @@ class TelegramBotEmptyAudienceBMSTU:
                               self.bot_messages["CHOOSE_LESSON"],
                               parse_mode=PARSE_MODE,
                               reply_markup=keyboard)
-        
-    
+
     def select_level(self, command_text: str, user_id: int):
-        keyboard = tbt.InlineKeyboardMarkup();
-        levelsNum = self.levels[self.data_users[user_id]["BUILDING"]]
-    
-        for levelNum in range(levelsNum):
-            button = tbt.InlineKeyboardButton(text=f"Этаж {levelNum + 1}",
-                                              callback_data=f"LEVEL:{levelNum + 1}")
+        keyboard = tbt.InlineKeyboardMarkup()
+        levels_num = self.levels[self.data_users[user_id]["BUILDING"]]
+
+        for level_num in range(levels_num):
+            button = tbt.InlineKeyboardButton(text=f"Этаж {level_num + 1}",
+                                              callback_data=f"LEVEL:{level_num + 1}")
             keyboard.add(button)
 
         self.bot.send_message(user_id,
@@ -154,34 +149,33 @@ class TelegramBotEmptyAudienceBMSTU:
                               self.bot_messages["CHOOSE_LEVEL"],
                               parse_mode=PARSE_MODE,
                               reply_markup=keyboard)
-        
 
     def select_audience(self, call: tbt.CallbackQuery, command_text: str):
         self.bot.send_message(call.message.chat.id,
                               self.bot_messages[command_text] +
                               self.bot_messages["CHOOSE_AUDIENCE"],
                               parse_mode=PARSE_MODE)
-        
-        self.bot.register_next_step_handler(call.message, self.save_audience)
 
+        self.bot.register_next_step_handler(call.message, self.save_audience)
 
     def save_audience(self, message: tbt.Message):
         user_id = message.chat.id
-        if (self.is_user_comebacked(user_id, "AUDIENCE")): return
-        
+
+        if (self.is_user_comebacked(user_id, "AUDIENCE")):
+            return
+
         self.data_users[user_id].update({"AUDIENCE": message.text})
 
+        items = self.data_users[user_id].items()
         string = "{\n" + \
-                 "".join([f'  {key}: {value},\n' for key,value in self.data_users[user_id].items()]) + \
+                 "".join([f'  {key}: {value},\n' for key, value in items]) + \
                  "}"
         logger.info(string.replace("\n", "").replace("  ", " "))
 
-        print(self.data_users)
-        
+        mode = self.data_users[user_id]['MODE']
         self.bot.send_message(user_id,
-                              f"{self.bot_messages[self.data_users[user_id]['MODE']]} `{string}`",
+                              f"{self.bot_messages[mode]} `{string}`",
                               parse_mode=PARSE_MODE)
-
 
     def init_command_process(self, message: tbt.Message):
         self.bot.send_message(message.from_user.id,
@@ -234,9 +228,9 @@ if __name__ == "__main__":
     levels_json = get_data_from_json(os.getenv("LEVELS_FILE_PATH"))
 
     if ((bot_messages_json is not None) and
-        (buildings_json is not None) and
-        (lessons_json is not None) and
-        (levels_json is not None)):
+            (buildings_json is not None) and
+            (lessons_json is not None) and
+            (levels_json is not None)):
         bot = TelegramBotEmptyAudienceBMSTU(bot_messages_json,
                                             buildings_json,
                                             lessons_json,
