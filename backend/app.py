@@ -1,7 +1,10 @@
-from flask import Flask
 from dotenv import load_dotenv
-from sqlalchemy import text
+
+from flask import Flask
+
 from flask_migrate import Migrate
+
+from sqlalchemy import text
 
 from database import db, init_db
 
