@@ -1,5 +1,6 @@
 from database import db
 
+
 class ScheduleClass(db.Model):
     __tablename__ = "classes"
 

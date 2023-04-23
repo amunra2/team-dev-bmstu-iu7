@@ -4,12 +4,11 @@ from sqlalchemy import text
 from flask_migrate import Migrate
 
 from database import db, init_db
-from models.classroom import Classroom
-from models.schedule_class import ScheduleClass
 
 app = Flask(__name__)
 init_db(app)
 migrate = Migrate(app, db)
+
 
 @app.route('/')
 def test_db():
