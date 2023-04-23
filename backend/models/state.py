@@ -23,4 +23,3 @@ class State(db.Model):
             f"class_id:     {self.class_id}\n"
             f"state:        {str_state}"
         )
-
