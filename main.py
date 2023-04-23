@@ -8,12 +8,12 @@ import telebot as tb
 import telebot.types as tbt
 
 PARSE_MODE = 'MarkdownV2'
-KEY=0
-VALUE=1
+KEY = 0
+VALUE = 1
 
 
 class TelegramBotEmptyAudienceBMSTU:
-    def __init__(self, bot_messages_json: dict, buildings_json: dict, 
+    def __init__(self, bot_messages_json: dict, buildings_json: dict,
                  lessons_json: dict, levels_json: dict):
         self.bot = tb.TeleBot(os.getenv("TOKEN"))
 
@@ -22,9 +22,8 @@ class TelegramBotEmptyAudienceBMSTU:
         self.lessons = lessons_json
         self.levels = levels_json
 
-        self.data: dict = {} # делится между всеми? как решать?
-        # по айди создавать словарь для каждого?
-        # и раз в какое-то время очищать?
+        # key - USER_ID, data - user data
+        self.data_users: dict = {}
 
         @self.bot.message_handler(commands=['start', 'help'])
         def init_command_handler(message: tbt.Message):
@@ -32,51 +31,83 @@ class TelegramBotEmptyAudienceBMSTU:
 
         @self.bot.message_handler(commands=['find_empty'])
         def find_empty_audience_handler(message: tbt.Message):
-            self.data.clear()
-            self.data.update({"MODE": "FIND_EMPTY_AUDIENCE", "USER_ID": message.from_user.id})
+            user_id = message.from_user.id
+            self.data_users.update({user_id: {"MODE": "FIND_EMPTY_AUDIENCE"}})
 
-            self.select_building(self.data["MODE"], self.data["USER_ID"])
+            self.select_building(self.data_users[user_id]["MODE"], user_id)
 
         @self.bot.message_handler(commands=['is_empty'])
-        def find_empty_audience_handler(message: tbt.Message):
-            self.data.clear()
-            self.data.update({"MODE": "IS_EMPTY_AUDIENCE", "USER_ID": message.from_user.id})
+        def is_empty_audience_handler(message: tbt.Message):
+            user_id = message.from_user.id
+            self.data_users.update({user_id: {"MODE": "IS_EMPTY_AUDIENCE"}})
 
-            self.select_building(self.data["MODE"], self.data["USER_ID"])
+            self.select_building(self.data_users[user_id]["MODE"], user_id)
 
         @self.bot.callback_query_handler(func=lambda call: call.data.startswith("BUILDING"))
         def save_building_handler(call: tbt.CallbackQuery):
-            dataString = call.data.split(":")
-            self.data.update({dataString[KEY]: dataString[VALUE]})
+            user_id = call.message.chat.id
 
-            self.select_lesson(self.data["MODE"], self.data["USER_ID"])
+            if (self.is_user_comebacked(user_id, "BUILDING")):
+                return
+
+            data_string = call.data.split(":")
+            self.data_users[user_id].update({data_string[KEY]: data_string[VALUE]})
+
+            self.select_lesson(self.data_users[user_id]["MODE"], user_id)
 
         @self.bot.callback_query_handler(func=lambda call: call.data.startswith("LESSON"))
         def save_lesson_handler(call: tbt.CallbackQuery):
-            dataString = call.data.split(":")
-            self.data.update({dataString[KEY]: dataString[VALUE]})
+            user_id = call.message.chat.id
 
-            if (self.data["MODE"] == "FIND_EMPTY_AUDIENCE"):
-                self.select_level(self.data["MODE"], self.data["USER_ID"])
+            if (self.is_user_comebacked(user_id, "LESSON")):
+                return
+
+            data_string = call.data.split(":")
+            self.data_users[user_id].update({data_string[KEY]: data_string[VALUE]})
+
+            if (self.data_users[user_id]["MODE"] == "FIND_EMPTY_AUDIENCE"):
+                self.select_level(self.data_users[user_id]["MODE"], user_id)
             else:
-                self.select_audience(call, self.data["MODE"])
+                self.select_audience(call, self.data_users[user_id]["MODE"])
 
         @self.bot.callback_query_handler(func=lambda call: call.data.startswith("LEVEL"))
         def save_level_handler(call: tbt.CallbackQuery):
-            dataString = call.data.split(":")
-            self.data.update({dataString[KEY]: dataString[VALUE]})
+            user_id = call.message.chat.id
+
+            if (self.is_user_comebacked(user_id, "LEVEL")):
+                return
+
+            data_string = call.data.split(":")
+            self.data_users[user_id].update({data_string[KEY]: data_string[VALUE]})
 
             string = "{\n" + \
-                     "".join([f'  {key}: {value},\n' for key,value in self.data.items()]) + \
+                     "".join([f'  {key}: {value},\n' for key,value in self.data_users[user_id].items()]) + \
                      "}"
             logger.info(string.replace("\n", "").replace("  ", " "))
-            
-            self.bot.send_message(self.data["USER_ID"],
-                              f"{self.bot_messages[self.data['MODE']]} `{string}`",
-                              parse_mode=PARSE_MODE)
 
+            print(self.data_users)
+
+            self.bot.send_message(user_id,
+                              f"{self.bot_messages[self.data_users[user_id]['MODE']]} `{string}`",
+                              parse_mode=PARSE_MODE)
+            self.data_users.pop(user_id)
+            print(self.data_users)
             
         logger.info("Бот запущен!")
+
+
+    def is_user_comebacked(self, user_id: int, stage: str):
+        if (self.data_users.get(user_id) is None):
+            self.bot.send_message(user_id,
+                                  self.bot_messages["CHOOSE_FAIL"],
+                                  parse_mode=PARSE_MODE)
+            return True
+        elif (self.data_users[user_id].get(stage) is not None):
+            self.bot.send_message(user_id,
+                                    self.bot_messages["CHOOSE_FAIL"],
+                                    parse_mode=PARSE_MODE)
+            return True
+        return False
 
 
     def select_building(self, command_text: str, user_id: int):
@@ -111,7 +142,7 @@ class TelegramBotEmptyAudienceBMSTU:
     
     def select_level(self, command_text: str, user_id: int):
         keyboard = tbt.InlineKeyboardMarkup();
-        levelsNum = self.levels[self.data["BUILDING"]]
+        levelsNum = self.levels[self.data_users[user_id]["BUILDING"]]
     
         for levelNum in range(levelsNum):
             button = tbt.InlineKeyboardButton(text=f"Этаж {levelNum + 1}",
@@ -135,15 +166,20 @@ class TelegramBotEmptyAudienceBMSTU:
 
 
     def save_audience(self, message: tbt.Message):
-        self.data.update({"AUDIENCE": message.text})
+        user_id = message.chat.id
+        if (self.is_user_comebacked(user_id, "AUDIENCE")): return
+        
+        self.data_users[user_id].update({"AUDIENCE": message.text})
 
         string = "{\n" + \
-                 "".join([f'  {key}: {value},\n' for key,value in self.data.items()]) + \
+                 "".join([f'  {key}: {value},\n' for key,value in self.data_users[user_id].items()]) + \
                  "}"
         logger.info(string.replace("\n", "").replace("  ", " "))
+
+        print(self.data_users)
         
-        self.bot.send_message(self.data["USER_ID"],
-                              f"{self.bot_messages[self.data['MODE']]} `{string}`",
+        self.bot.send_message(user_id,
+                              f"{self.bot_messages[self.data_users[user_id]['MODE']]} `{string}`",
                               parse_mode=PARSE_MODE)
 
 
