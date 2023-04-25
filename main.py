@@ -27,10 +27,19 @@ class TelegramBotEmptyAudienceBMSTU:
 
         @self.bot.message_handler(commands=['start', 'help'])
         def init_command_handler(message: tbt.Message):
+            """
+                Перехватывает команды /start и /help.
+                Отправляет общую информацию по работе с ботом.
+            """
             self.init_command_process(message)
 
         @self.bot.message_handler(commands=['find_empty'])
         def find_empty_audience_handler(message: tbt.Message):
+            """
+                Перехватывает команду поиска свободной аудитории /find_empty.
+                Инициализирует запись о пользователе в массиве data_users.
+                Вызывает функцию выбора корпуса.
+            """
             user_id = message.from_user.id
             self.data_users.update({user_id: {"MODE": "FIND_EMPTY_AUDIENCE"}})
 
@@ -38,6 +47,11 @@ class TelegramBotEmptyAudienceBMSTU:
 
         @self.bot.message_handler(commands=['is_empty'])
         def is_empty_audience_handler(message: tbt.Message):
+            """
+                Перехватывает команду проверки "свободности" аудитории /is_empty.
+                Инициализирует запись о пользователе в массиве data_users.
+                Вызывает функцию выбора корпуса.
+            """
             user_id = message.from_user.id
             self.data_users.update({user_id: {"MODE": "IS_EMPTY_AUDIENCE"}})
 
@@ -45,7 +59,15 @@ class TelegramBotEmptyAudienceBMSTU:
 
         @self.bot.callback_query_handler(func=lambda call: call.data.startswith("BUILDING"))
         def save_building_handler(call: tbt.CallbackQuery):
+            """
+                Перехватывает нажатие inline-клавиатуры выбора корпуса по значению,
+                начинающееся с ключевого слова "BUILDING".
+
+                Сохраняет данные о выбранном корпусе.
+                Вызывает функцию выбора пары.
+            """
             user_id = call.message.chat.id
+            self.delete_stage_messages(user_id, [call.message.message_id])
 
             if (self.is_user_comebacked(user_id, "BUILDING")):
                 return
@@ -57,7 +79,16 @@ class TelegramBotEmptyAudienceBMSTU:
 
         @self.bot.callback_query_handler(func=lambda call: call.data.startswith("LESSON"))
         def save_lesson_handler(call: tbt.CallbackQuery):
+            """
+                Перехватывает нажатие inline-клавиатуры выбора пары по значению,
+                начинающееся с ключевого слова "LESSON".
+
+                Сохраняет данные о выбранной паре.
+                Вызывает функцию выбора этажа (для поиска свободной аудитории) или
+                функцию ввода аудитории (для определения "свободности" аудитории).
+            """
             user_id = call.message.chat.id
+            self.delete_stage_messages(user_id, [call.message.message_id])
 
             if (self.is_user_comebacked(user_id, "LESSON")):
                 return
@@ -72,7 +103,16 @@ class TelegramBotEmptyAudienceBMSTU:
 
         @self.bot.callback_query_handler(func=lambda call: call.data.startswith("LEVEL"))
         def save_level_handler(call: tbt.CallbackQuery):
+            """
+                Перехватывает нажатие inline-клавиатуры выбора пары по значению,
+                начинающееся с ключевого слова "LESSON".
+
+                Сохраняет данные о выбранной паре.
+                Вызывает функцию выбора этажа (для поиска свободной аудитории) или
+                функцию ввода аудитории (для определения "свободности" аудитории).
+            """
             user_id = call.message.chat.id
+            self.delete_stage_messages(user_id, [call.message.message_id])
 
             if (self.is_user_comebacked(user_id, "LEVEL")):
                 return
@@ -80,34 +120,56 @@ class TelegramBotEmptyAudienceBMSTU:
             data_string = call.data.split(":")
             self.data_users[user_id].update({data_string[KEY]: data_string[VALUE]})
 
-            items = self.data_users[user_id].items()
-            string = "{\n" + \
-                     "".join([f'  {key}: {value},\n' for key, value in items]) + \
-                     "}"
-            logger.info(string.replace("\n", "").replace("  ", " "))
+            if (logger.level <= logging.INFO):
+                items = self.data_users[user_id].items()
+                string = "{\n" + \
+                         "".join([f'  {key}: {value},\n' for key, value in items]) + \
+                         "}"
+                logger.info(string.replace("\n", "").replace("  ", " "))
 
-            mode = self.data_users[user_id]['MODE']
-            self.bot.send_message(user_id,
-                                  f"{self.bot_messages[mode]} `{string}`",
-                                  parse_mode=PARSE_MODE)
+                mode = self.data_users[user_id]['MODE']
+                self.bot.send_message(user_id,
+                                      f"{self.bot_messages[mode]} `{string}`",
+                                      parse_mode=PARSE_MODE)
+
             self.data_users.pop(user_id)
 
-        logger.info("Бот запущен!")
+        @self.bot.message_handler(func=lambda message: True,
+                                  content_types=['audio', 'photo', 'voice', 'video',
+                                                 'document', 'text', 'location',
+                                                 'contact', 'sticker'])
+        def default_command_handler(message):
+            """
+                Перехватывает все необрабатываемое.
+                Выводит общую информацию по боту.
+            """
+            self.init_command_process(message)
+
+        logger.info("Бот запущен")
 
     def is_user_comebacked(self, user_id: int, stage: str):
+        """
+            Функция проверяет:
+            1) Есть ли запись о пользователе (запрещено работать не с первого этапа команды)
+            2) Ввел ли уже пользователь данные по этапу stage (запрещается вводить заново)
+        """
+        error = False
         if (self.data_users.get(user_id) is None):
-            self.bot.send_message(user_id,
-                                  self.bot_messages["CHOOSE_FAIL"],
-                                  parse_mode=PARSE_MODE)
-            return True
+            error = True
         elif (self.data_users[user_id].get(stage) is not None):
+            error = True
+
+        if (error):
             self.bot.send_message(user_id,
                                   self.bot_messages["CHOOSE_FAIL"],
                                   parse_mode=PARSE_MODE)
-            return True
-        return False
+
+        return error
 
     def select_building(self, command_text: str, user_id: int):
+        """
+            Функция выводит inline-клавиатуру для выбора корпуса
+        """
         keyboard = tbt.InlineKeyboardMarkup()
 
         for key, value in self.buildings.items():
@@ -122,6 +184,9 @@ class TelegramBotEmptyAudienceBMSTU:
                               reply_markup=keyboard)
 
     def select_lesson(self, command_text: str, user_id: int):
+        """
+            Функция выводит inline-клавиатуру для выбора пары
+        """
         keyboard = tbt.InlineKeyboardMarkup()
 
         for key, value in self.lessons.items():
@@ -136,6 +201,9 @@ class TelegramBotEmptyAudienceBMSTU:
                               reply_markup=keyboard)
 
     def select_level(self, command_text: str, user_id: int):
+        """
+            Функция выводит inline-клавиатуру для выбора этажа
+        """
         keyboard = tbt.InlineKeyboardMarkup()
         levels_num = self.levels[self.data_users[user_id]["BUILDING"]]
 
@@ -151,6 +219,9 @@ class TelegramBotEmptyAudienceBMSTU:
                               reply_markup=keyboard)
 
     def select_audience(self, call: tbt.CallbackQuery, command_text: str):
+        """
+            Функция просит пользователя ввести номер аудитории в определенном формате
+        """
         self.bot.send_message(call.message.chat.id,
                               self.bot_messages[command_text] +
                               self.bot_messages["CHOOSE_AUDIENCE"],
@@ -159,25 +230,42 @@ class TelegramBotEmptyAudienceBMSTU:
         self.bot.register_next_step_handler(call.message, self.save_audience)
 
     def save_audience(self, message: tbt.Message):
+        """
+            Функция сохраняет информацию о введеном номере аудитории
+        """
         user_id = message.chat.id
+        self.delete_stage_messages(user_id, [message.message_id - 1, message.message_id])
 
         if (self.is_user_comebacked(user_id, "AUDIENCE")):
             return
 
         self.data_users[user_id].update({"AUDIENCE": message.text})
 
-        items = self.data_users[user_id].items()
-        string = "{\n" + \
-                 "".join([f'  {key}: {value},\n' for key, value in items]) + \
-                 "}"
-        logger.info(string.replace("\n", "").replace("  ", " "))
+        if (logger.level <= logging.INFO):
+            items = self.data_users[user_id].items()
+            string = "{\n" + \
+                     "".join([f'  {key}: {value},\n' for key, value in items]) + \
+                     "}"
+            logger.info(string.replace("\n", "").replace("  ", " "))
 
-        mode = self.data_users[user_id]['MODE']
-        self.bot.send_message(user_id,
-                              f"{self.bot_messages[mode]} `{string}`",
-                              parse_mode=PARSE_MODE)
+            mode = self.data_users[user_id]['MODE']
+            self.bot.send_message(user_id,
+                                  f"{self.bot_messages[mode]} `{string}`",
+                                  parse_mode=PARSE_MODE)
+
+        self.data_users.pop(user_id)
+
+    def delete_stage_messages(self, chat_id: int, message_ids: list[int]):
+        """
+            Удаляет сообщения стадии ввода
+        """
+        for message_id in message_ids:
+            self.bot.delete_message(chat_id, message_id)
 
     def init_command_process(self, message: tbt.Message):
+        """
+            Функция выводит общую информацию по боту
+        """
         self.bot.send_message(message.from_user.id,
                               self.bot_messages["HI"] +
                               self.bot_messages["COMMAND_FIND_EMPTY"] +
@@ -185,10 +273,16 @@ class TelegramBotEmptyAudienceBMSTU:
                               parse_mode=PARSE_MODE)
 
     def run(self):
+        """
+            Запускает цикл работы бота
+        """
         self.bot.infinity_polling()
 
 
 def get_logger(log_level: str) -> logging.Logger:
+    """
+        Функция настройки логгера
+    """
     logger = logging.getLogger(__name__)
     handler = logging.StreamHandler()
 
@@ -203,6 +297,9 @@ def get_logger(log_level: str) -> logging.Logger:
 
 
 def get_data_from_json(file_path: str):
+    """
+        Функция парсит JSON файл с данными и переводит это в словарь dict
+    """
     try:
         with open(file_path, 'r') as file:
             data_json: dict = json.load(file)
@@ -220,6 +317,9 @@ def get_data_from_json(file_path: str):
 
 
 if __name__ == "__main__":
+    """
+        Запуск
+    """
     load_dotenv()  # должен быть файл .env, смотреть .env.example
     logger = get_logger(os.getenv("LOG_LEVEL"))
     bot_messages_json = get_data_from_json(os.getenv("MESSAGES_FILE_PATH"))
