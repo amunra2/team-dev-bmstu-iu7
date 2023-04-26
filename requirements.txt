@@ -7,6 +7,13 @@ flake8-import-order
 pep8-naming
 pycodestyle
 
+# Backend
+flask
+flask_migrate
+flask_sqlalchemy
+sqlalchemy
+waitress
+
 # Telegram Bot Control
 pytelegrambotapi
 
