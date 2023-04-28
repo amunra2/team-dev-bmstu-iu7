@@ -1,3 +1,5 @@
+import json
+
 from flask import jsonify, request
 
 from flask_restful import Resource
@@ -10,6 +12,24 @@ from schemes.classroom_schema import ClassroomSchema
 
 class ClassroomAPI(Resource):
     def get(self):
+        is_free_mode = (request.args.get("is_free") == "true")
+
+        if is_free_mode:
+            number = request.args.get("number")
+            schedule_class = request.args.get("class")
+            week, day, time = map(int, schedule_class.split(','))
+
+            classroom_id = Classroom.query.filter_by(number=number).with_entities(Classroom.classroom_id)
+            schedule_class_id = ScheduleClass.query\
+                                .filter_by(week=week, day=day, time=time)\
+                                .with_entities(ScheduleClass.class_id)
+
+            in_states = State.query.filter_by(classroom_id=classroom_id, class_id=schedule_class_id).all()
+
+            answer = { "is_free" : False if in_states else True }
+
+            return jsonify(answer)
+
         schedule_class = request.args.get("class")
 
         building = request.args.get("building")
