@@ -13,6 +13,7 @@ from database import db, init_db
 from resources.classroom_api import ClassroomAPI
 
 app = Flask(__name__)
+app.url_map.strict_slashes = False
 
 init_db(app)
 migrate = Migrate(app, db)
