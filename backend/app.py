@@ -4,14 +4,21 @@ from flask import Flask
 
 from flask_migrate import Migrate
 
+from flask_restful import Api
+
 from sqlalchemy import text
 
 from database import db, init_db
 
+from resources.classroom_api import ClassroomAPI
+
 app = Flask(__name__)
+
 init_db(app)
 migrate = Migrate(app, db)
 
+api = Api(app)
+api.add_resource(ClassroomAPI, "/classrooms")
 
 @app.route('/')
 def test_db():
