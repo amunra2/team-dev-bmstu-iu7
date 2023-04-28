@@ -11,7 +11,7 @@ class ClassroomAPI(Resource):
         schedule_class = request.args.get("class")
 
         building = request.args.get("building")
-        floor = int(request.args.get("floor") or -1)
+        floor = request.args.get("floor")
 
         fields = request.args.get("fields")
         fields = fields.split(',') if fields else fields
@@ -22,8 +22,8 @@ class ClassroomAPI(Resource):
         if building:
             classrooms = classrooms.filter_by(building=building)
 
-        if floor >= 0:
-            classrooms = classrooms.filter_by(floor=floor)
+        if floor:
+            classrooms = classrooms.filter_by(floor=int(floor))
 
         classrooms = classrooms.all()
 
