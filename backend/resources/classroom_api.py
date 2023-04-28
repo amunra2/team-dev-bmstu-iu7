@@ -17,6 +17,14 @@ class ClassroomAPI(Resource):
         fields = fields.split(',') if fields else fields
         schema = ClassroomSchema(only=fields)
 
-        classrooms = Classroom.query.all()
+        classrooms = Classroom.query
+
+        if building:
+            classrooms = classrooms.filter_by(building=building)
+
+        if floor >= 0:
+            classrooms = classrooms.filter_by(floor=floor)
+
+        classrooms = classrooms.all()
 
         return jsonify([schema.dump(classroom) for classroom in classrooms])
