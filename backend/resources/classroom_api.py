@@ -1,4 +1,4 @@
-from flask import jsonify
+from flask import jsonify, request
 
 from flask_restful import Resource
 
@@ -8,7 +8,9 @@ from schemes.classroom_schema import ClassroomSchema
 
 class ClassroomAPI(Resource):
     def get(self):
-        self.classroom_schema = ClassroomSchema(only=('number',))
+        fields = request.args.get("fields")
+        fields = fields.split(',') if fields else fields
+        schema = ClassroomSchema(only=fields)
+
         classrooms = Classroom.query.all()
-        return jsonify([self.classroom_schema.dump(classroom)
-                        for classroom in classrooms])
+        return jsonify([schema.dump(classroom) for classroom in classrooms])
