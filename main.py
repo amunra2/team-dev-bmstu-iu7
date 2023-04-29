@@ -6,8 +6,8 @@ from dotenv import load_dotenv
 import telebot as tb
 import telebot.types as tbt
 
-from utils.logger import get_logger
 from utils.get_json_data import get_data_from_json
+from utils.get_logger import get_logger
 
 PARSE_MODE = 'MarkdownV2'
 KEY = 0
@@ -225,9 +225,9 @@ class TelegramBotEmptyAudienceBMSTU:
             Функция просит пользователя ввести номер аудитории в определенном формате
         """
         message = self.bot.send_message(call.message.chat.id,
-                              self.bot_messages[command_text] +
-                              self.bot_messages["CHOOSE_AUDIENCE"],
-                              parse_mode=PARSE_MODE)
+                                        self.bot_messages[command_text] +
+                                        self.bot_messages["CHOOSE_AUDIENCE"],
+                                        parse_mode=PARSE_MODE)
 
         self.bot.register_next_step_handler(message, self.save_audience, message.message_id)
 
@@ -287,7 +287,7 @@ if __name__ == "__main__":
     """
     load_dotenv()  # должен быть файл .env, смотреть .env.example
     logger = get_logger(os.getenv("LOG_LEVEL"))
-    
+
     bot_messages_json = get_data_from_json(logger, os.getenv("MESSAGES_FILE_PATH"))
     buildings_json = get_data_from_json(logger, os.getenv("BUILDINGS_FILE_PATH"))
     lessons_json = get_data_from_json(logger, os.getenv("LESSONS_FILE_PATH"))
