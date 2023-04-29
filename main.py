@@ -222,19 +222,19 @@ class TelegramBotEmptyAudienceBMSTU:
         """
             Функция просит пользователя ввести номер аудитории в определенном формате
         """
-        self.bot.send_message(call.message.chat.id,
+        message = self.bot.send_message(call.message.chat.id,
                               self.bot_messages[command_text] +
                               self.bot_messages["CHOOSE_AUDIENCE"],
                               parse_mode=PARSE_MODE)
 
-        self.bot.register_next_step_handler(call.message, self.save_audience)
+        self.bot.register_next_step_handler(message, self.save_audience, message.message_id)
 
-    def save_audience(self, message: tbt.Message):
+    def save_audience(self, message: tbt.Message, message_id_to_delete: int):
         """
             Функция сохраняет информацию о введеном номере аудитории
         """
         user_id = message.chat.id
-        self.delete_stage_messages(user_id, [message.message_id - 1, message.message_id])
+        self.delete_stage_messages(user_id, [message_id_to_delete, message.message_id])
 
         if (self.is_user_comebacked(user_id, "AUDIENCE")):
             return
