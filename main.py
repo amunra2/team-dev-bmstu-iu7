@@ -1,4 +1,3 @@
-import json
 import logging
 import os
 
@@ -6,6 +5,9 @@ from dotenv import load_dotenv
 
 import telebot as tb
 import telebot.types as tbt
+
+from utils.logger import get_logger
+from utils.get_json_data import get_data_from_json
 
 PARSE_MODE = 'MarkdownV2'
 KEY = 0
@@ -279,53 +281,17 @@ class TelegramBotEmptyAudienceBMSTU:
         self.bot.infinity_polling()
 
 
-def get_logger(log_level: str) -> logging.Logger:
-    """
-        Функция настройки логгера
-    """
-    logger = logging.getLogger(__name__)
-    handler = logging.StreamHandler()
-
-    format_log_message = '%(asctime)s: (%(name)s) - %(levelname)s:\t%(message)s'
-    formatter = logging.Formatter(format_log_message)
-    handler.setFormatter(formatter)
-
-    logger.addHandler(handler)
-    logger.setLevel(log_level)
-
-    return logger
-
-
-def get_data_from_json(file_path: str):
-    """
-        Функция парсит JSON файл с данными и переводит это в словарь dict
-    """
-    try:
-        with open(file_path, 'r') as file:
-            data_json: dict = json.load(file)
-    except FileNotFoundError:
-        logger.critical(f'Неверно указан путь до файла {file_path}')
-        return None
-    except json.decoder.JSONDecodeError:
-        logger.critical('Файл поврежден')
-        return None
-    except Exception as exception:
-        logger.critical(str(exception))
-        return None
-
-    return data_json
-
-
 if __name__ == "__main__":
     """
         Запуск
     """
     load_dotenv()  # должен быть файл .env, смотреть .env.example
     logger = get_logger(os.getenv("LOG_LEVEL"))
-    bot_messages_json = get_data_from_json(os.getenv("MESSAGES_FILE_PATH"))
-    buildings_json = get_data_from_json(os.getenv("BUILDINGS_FILE_PATH"))
-    lessons_json = get_data_from_json(os.getenv("LESSONS_FILE_PATH"))
-    levels_json = get_data_from_json(os.getenv("LEVELS_FILE_PATH"))
+    
+    bot_messages_json = get_data_from_json(logger, os.getenv("MESSAGES_FILE_PATH"))
+    buildings_json = get_data_from_json(logger, os.getenv("BUILDINGS_FILE_PATH"))
+    lessons_json = get_data_from_json(logger, os.getenv("LESSONS_FILE_PATH"))
+    levels_json = get_data_from_json(logger, os.getenv("LEVELS_FILE_PATH"))
 
     if ((bot_messages_json is not None) and
             (buildings_json is not None) and
