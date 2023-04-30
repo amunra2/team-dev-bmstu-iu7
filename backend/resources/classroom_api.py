@@ -6,6 +6,8 @@ from flask_restful import Resource
 
 from flasgger.utils import swag_from
 
+from database import db
+
 from models.classroom import Classroom
 from models.schedule_class import ScheduleClass
 from models.state import State
@@ -36,6 +38,30 @@ class ClassroomAPI(Resource):
         classrooms = self._get_by_params(building, floor, schedule_class)
 
         return jsonify([schema.dump(classroom) for classroom in classrooms])
+
+    @swag_from('../swagger/classrooms_post.yml', endpoint='classrooms_get_all')
+    def post(self):
+        fields = request.args.get("fields")
+        fields = fields.split(',') if fields else fields
+        schema = ClassroomSchema(only=fields)
+
+        classroom_json = request.json
+        building=classroom_json["building"]
+        floor=classroom_json["floor"]
+        number=classroom_json["number"]
+
+        classroom = Classroom.query.filter_by(building=building,floor=floor,number=number).first()
+
+        if classroom:
+            return jsonify(schema.dump(classroom))
+
+        new_classroom = Classroom(building=building,floor=floor,number=number)
+
+        db.session.add(new_classroom)
+        db.session.commit()
+
+        return jsonify(schema.dump(new_classroom))
+
 
     def _check_free(self):
         number = request.args.get("number")
