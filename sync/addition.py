@@ -19,6 +19,10 @@ BUILDINGS = {"": "Главное здание",
 
 
 def add_data(logger: logging.Logger):
+    """
+        Функция добавления данных в базу.
+    """
+
     uuids = get_groups_uuids(logger)
 
     if uuids is None:
@@ -77,6 +81,10 @@ def get_groups_uuids(logger: logging.Logger):
 
 
 def get_faculty(group_abbr):
+    """
+        Функция получения факультета группы.
+    """
+
     department = group_abbr.split("-")[0]
 
     i = 0
@@ -150,6 +158,10 @@ def parse_schedule_item(logger: logging.Logger, schedule_item):
 
 
 def get_classroom(classroom):
+    """
+        Функция получения сущности аудитории.
+    """
+
     building_abbr = ""
     number = ""
 
@@ -187,6 +199,10 @@ def get_classroom(classroom):
 
 
 def get_building_name(building_abbr):
+    """
+        Функция получения названия корпуса.
+    """
+
     for key in BUILDINGS.keys():
         if building_abbr == key:
             return BUILDINGS[key]
@@ -195,6 +211,10 @@ def get_building_name(building_abbr):
 
 
 def add_entities(logger: logging.Logger, classroom, schedule_class):
+    """
+        Функция добавления сущностей в базу.
+    """
+
     url = os.getenv("DATA_URL")
 
     try:
