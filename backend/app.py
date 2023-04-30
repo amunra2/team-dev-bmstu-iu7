@@ -20,7 +20,7 @@ init_db(app)
 migrate = Migrate(app, db)
 
 api = Api(app)
-api.add_resource(ClassroomAPI, "/classrooms")
+api.add_resource(ClassroomAPI, "/classrooms", "/classrooms/<int:classroom_id>")
 
 @app.route('/')
 def test_db():

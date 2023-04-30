@@ -11,15 +11,19 @@ from models.state import State
 from schemes.classroom_schema import ClassroomSchema
 
 class ClassroomAPI(Resource):
-    def get(self):
+    def get(self, classroom_id=None):
+        fields = request.args.get("fields")
+        fields = fields.split(',') if fields else fields
+        schema = ClassroomSchema(only=fields)
+
+        if classroom_id is not None:
+            classroom = Classroom.query.get(classroom_id)
+            return jsonify(schema.dump(classroom))
+
         is_free_mode = (request.args.get("is_free") == "true")
 
         if is_free_mode:
             return self._check_free()
-
-        fields = request.args.get("fields")
-        fields = fields.split(',') if fields else fields
-        schema = ClassroomSchema(only=fields)
 
         building = request.args.get("building")
         floor = request.args.get("floor")
@@ -35,6 +39,7 @@ class ClassroomAPI(Resource):
         week, day, time = map(int, schedule_class.split(','))
 
         classroom_id = Classroom.query.filter_by(number=number).with_entities(Classroom.classroom_id)
+
         schedule_class_id = ScheduleClass.query\
                             .filter_by(week=week, day=day, time=time)\
                             .with_entities(ScheduleClass.class_id)
