@@ -1,0 +1,7 @@
+Delete all classes
+---
+tags:
+  - Classes
+responses:
+  200:
+    description:  All classes deleted

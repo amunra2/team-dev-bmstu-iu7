@@ -1,0 +1,19 @@
+Get classes list
+---
+tags:
+  - Classes
+parameters:
+  - in: query
+    name: fields
+    description: fields of class entity
+    required: false
+    schema:
+      type: array
+      items:
+        type: string
+    style: form
+responses:
+  200:
+    description: Classes found
+  404:
+    description: Not found
