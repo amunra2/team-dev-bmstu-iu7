@@ -9,7 +9,7 @@ class Classroom(db.Model):
     floor = db.Column(db.Integer)
     number = db.Column(db.String())
 
-    states = db.relationship("State", back_populates="classroom")
+    states = db.relationship("State", back_populates="classroom", cascade="delete")
 
     def __repr__(self):
         return (
