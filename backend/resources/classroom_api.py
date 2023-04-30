@@ -63,6 +63,14 @@ class ClassroomAPI(Resource):
         return jsonify(schema.dump(new_classroom))
 
 
+    @swag_from('../swagger/classrooms_delete.yml', endpoint='classrooms_get_all')
+    def delete(self):
+        deleted_number = db.session.query(Classroom).delete()
+        db.session.commit()
+
+        return deleted_number
+
+
     def _check_free(self):
         number = request.args.get("number")
         schedule_class = request.args.get("class")
