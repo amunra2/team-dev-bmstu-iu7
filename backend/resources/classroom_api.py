@@ -4,6 +4,8 @@ from flask import jsonify, request
 
 from flask_restful import Resource
 
+from flasgger.utils import swag_from
+
 from models.classroom import Classroom
 from models.schedule_class import ScheduleClass
 from models.state import State
@@ -11,6 +13,8 @@ from models.state import State
 from schemes.classroom_schema import ClassroomSchema
 
 class ClassroomAPI(Resource):
+    @swag_from('../swagger/classrooms_get_all.yml', endpoint='classrooms_get_all')
+    @swag_from('../swagger/classrooms_get_by_id.yml', endpoint='classrooms_get_by_id')
     def get(self, classroom_id=None):
         fields = request.args.get("fields")
         fields = fields.split(',') if fields else fields

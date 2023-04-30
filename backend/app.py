@@ -6,6 +6,8 @@ from flask_migrate import Migrate
 
 from flask_restful import Api
 
+from flasgger import Swagger
+
 from sqlalchemy import text
 
 from database import db, init_db
@@ -20,7 +22,10 @@ init_db(app)
 migrate = Migrate(app, db)
 
 api = Api(app)
-api.add_resource(ClassroomAPI, "/classrooms", "/classrooms/<int:classroom_id>")
+api.add_resource(ClassroomAPI, "/classrooms", endpoint="classrooms_get_all")
+api.add_resource(ClassroomAPI, "/classrooms/<int:classroom_id>", endpoint="classrooms_get_by_id")
+
+swagger = Swagger(app)
 
 @app.route('/')
 def test_db():
