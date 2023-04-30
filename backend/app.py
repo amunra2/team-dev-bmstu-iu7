@@ -14,6 +14,7 @@ from database import db, init_db
 
 from resources.classroom_api import ClassroomAPI
 from resources.class_api import ClassAPI
+from resources.state_api import StateAPI
 
 app = Flask(__name__)
 app.url_map.strict_slashes = False
@@ -27,6 +28,7 @@ api.add_resource(ClassroomAPI, "/classrooms", endpoint="classrooms_get_all")
 api.add_resource(ClassroomAPI, "/classrooms/<int:classroom_id>", endpoint="classrooms_get_by_id")
 api.add_resource(ClassAPI, "/classes", endpoint="classes_get_all")
 api.add_resource(ClassAPI, "/classes/<int:class_id>", endpoint="classes_get_by_id")
+api.add_resource(StateAPI, "/classrooms/<int:classroom_id>/classes/<int:class_id>", endpoint="states")
 
 swagger = Swagger(app)
 
