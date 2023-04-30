@@ -10,7 +10,7 @@ class State(db.Model):
     class_id = db.Column(db.Integer,
                          db.ForeignKey("classes.class_id", ondelete="CASCADE"),
                          primary_key=True)
-    state = db.Column(db.Boolean)
+    state = db.Column(db.Boolean, default=False)
 
     classroom = db.relationship("Classroom", back_populates="states", cascade="delete")
     schedule_class = db.relationship("ScheduleClass", back_populates="states", cascade="delete")
