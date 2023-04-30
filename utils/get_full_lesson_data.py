@@ -21,12 +21,12 @@ def get_study_week():
         semester_start_date = datetime(today.year, SEPTEMBER, SEMESTER_1_START_DAY)
     else:
         return NO_SEMESTER
-    
+
     today_day_of_year = today.timetuple().tm_yday
     semester_start_date_day_of_year = semester_start_date.timetuple().tm_yday
-    
+
     week = int(((today_day_of_year - semester_start_date_day_of_year) / DAYS_IN_WEEK) + 1)
-    
+
     if (week % 2 == 1):
         return CHISLITEL
     else:
@@ -39,7 +39,7 @@ def get_full_lesson_data(lesson: int):
 
     if (study_week == NO_SEMESTER):
         study_week = -1
-    
+
     day = datetime.now().weekday()
 
     return f"{study_week},{day},{lesson}"
