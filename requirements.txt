@@ -18,8 +18,17 @@ marshmallow_sqlalchemy
 sqlalchemy
 waitress
 
+# Synchronization
+requests
+
 # Telegram Bot Control
 pytelegrambotapi
 
 # .end variables
 python-dotenv
+
+# Requests
+requests
+
+# Schedule
+schedule
