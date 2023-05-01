@@ -1,9 +1,9 @@
 import logging
 import os
 
-from codes import ReturnCode
-
 import requests
+
+from sync.codes import ReturnCode
 
 
 def delete_data(logger: logging.Logger):

@@ -1,10 +1,8 @@
 import logging
 
-from addition import add_data
-
-from codes import ReturnCode
-
-from deletion import delete_data
+from sync.addition import add_data
+from sync.codes import ReturnCode
+from sync.deletion import delete_data
 
 
 def sync_data(logger: logging.Logger):
