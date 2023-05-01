@@ -22,3 +22,9 @@ pytelegrambotapi
 
 # .end variables
 python-dotenv
+
+# Requests
+requests
+
+# Schedule
+schedule
