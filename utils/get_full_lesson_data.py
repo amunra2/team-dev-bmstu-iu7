@@ -36,10 +36,6 @@ def get_study_week():
 # return: STUDY_WEEK,DAY,LESSON
 def get_full_lesson_data(lesson: int):
     study_week = get_study_week()
-
-    if (study_week == NO_SEMESTER):
-        study_week = -1
-
     day = datetime.now().weekday()
 
     return f"{study_week},{day},{lesson}"

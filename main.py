@@ -187,8 +187,8 @@ class TelegramBotEmptyAudienceBMSTU:
                     free_audiences_str += f"\n \\- `{audience['number']}`"
 
                 message = bot_messages_json[user_data['MODE']] + \
-                          bot_messages_json['EMPTY_AUDIENCES_FOUND'] + \
-                          free_audiences_str
+                    bot_messages_json['EMPTY_AUDIENCES_FOUND'] + \
+                    free_audiences_str
 
             self.bot.send_message(user_id, message, parse_mode=PARSE_MODE)
         except Exception as exception:
@@ -367,7 +367,7 @@ class TelegramBotEmptyAudienceBMSTU:
             Запускает цикл работы бота и синхронизацию данных БД
         """
         Thread(target=schedule_checker).start()
-        schedule.every().second.do(sync_data)
+        schedule.every().monday.do(sync_data)
         self.bot.infinity_polling()
 
 
