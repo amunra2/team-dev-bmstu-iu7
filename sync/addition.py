@@ -34,7 +34,9 @@ def add_data(logger: logging.Logger):
     uuids_len = len(uuids)
 
     for i, uuid in enumerate(uuids):
-        print(f"{uuid} ({i+1}/{uuids_len})")
+        if (logger.level <= logging.INFO):
+            logger.info(f"{uuid} ({i+1}/{uuids_len})")
+
         schedule = get_group_schedule(logger, uuid)
 
         if schedule is None:
