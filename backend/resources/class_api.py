@@ -1,18 +1,15 @@
-import json
+from flasgger.utils import swag_from
 
 from flask import jsonify, request
 
 from flask_restful import Resource
 
-from flasgger.utils import swag_from
-
 from database import db
 
-from models.classroom import Classroom
 from models.schedule_class import ScheduleClass
-from models.state import State
 
 from schemes.class_schema import ClassSchema
+
 
 class ClassAPI(Resource):
     @swag_from('../swagger/classes_get_all.yml', endpoint='classes_get_all')
@@ -45,18 +42,17 @@ class ClassAPI(Resource):
         day = class_json["day"]
         time = class_json["time"]
 
-        schedule_class= ScheduleClass.query.filter_by(week=week,day=day,time=time).first()
+        schedule_class = ScheduleClass.query.filter_by(week=week, day=day, time=time).first()
 
         if schedule_class:
             return jsonify(schema.dump(schedule_class))
 
-        new_class = ScheduleClass(week=week,day=day,time=time)
+        new_class = ScheduleClass(week=week, day=day, time=time)
 
         db.session.add(new_class)
         db.session.commit()
 
         return jsonify(schema.dump(new_class))
-
 
     @swag_from('../swagger/classes_delete.yml', endpoint='classes_get_all')
     def delete(self):
@@ -78,5 +74,3 @@ class ClassAPI(Resource):
             classes = classes.filter_by(time=int(time))
 
         return classes.all()
-
-

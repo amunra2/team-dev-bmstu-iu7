@@ -1,18 +1,15 @@
-import json
+from flasgger.utils import swag_from
 
-from flask import jsonify, request
+from flask import jsonify
 
 from flask_restful import Resource
 
-from flasgger.utils import swag_from
-
 from database import db
 
-from models.classroom import Classroom
-from models.schedule_class import ScheduleClass
 from models.state import State
 
 from schemes.state_schema import StateSchema
+
 
 class StateAPI(Resource):
     @swag_from('../swagger/states_post.yml', endpoint='states')

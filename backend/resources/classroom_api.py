@@ -1,10 +1,8 @@
-import json
+from flasgger.utils import swag_from
 
 from flask import jsonify, request
 
 from flask_restful import Resource
-
-from flasgger.utils import swag_from
 
 from database import db
 
@@ -13,6 +11,7 @@ from models.schedule_class import ScheduleClass
 from models.state import State
 
 from schemes.classroom_schema import ClassroomSchema
+
 
 class ClassroomAPI(Resource):
     @swag_from('../swagger/classrooms_get_all.yml', endpoint='classrooms_get_all')
@@ -46,22 +45,21 @@ class ClassroomAPI(Resource):
         schema = ClassroomSchema(only=fields)
 
         classroom_json = request.json
-        building=classroom_json["building"]
-        floor=classroom_json["floor"]
-        number=classroom_json["number"]
+        building = classroom_json["building"]
+        floor = classroom_json["floor"]
+        number = classroom_json["number"]
 
-        classroom = Classroom.query.filter_by(building=building,floor=floor,number=number).first()
+        classroom = Classroom.query.filter_by(building=building, floor=floor, number=number).first()
 
         if classroom:
             return jsonify(schema.dump(classroom))
 
-        new_classroom = Classroom(building=building,floor=floor,number=number)
+        new_classroom = Classroom(building=building, floor=floor, number=number)
 
         db.session.add(new_classroom)
         db.session.commit()
 
         return jsonify(schema.dump(new_classroom))
-
 
     @swag_from('../swagger/classrooms_delete.yml', endpoint='classrooms_get_all')
     def delete(self):
@@ -70,21 +68,22 @@ class ClassroomAPI(Resource):
 
         return deleted_number
 
-
     def _check_free(self):
         number = request.args.get("number")
         schedule_class = request.args.get("class")
         week, day, time = map(int, schedule_class.split(','))
 
-        classroom_id = Classroom.query.filter_by(number=number).with_entities(Classroom.classroom_id)
+        classroom_id = Classroom.query.filter_by(number=number)\
+                       .with_entities(Classroom.classroom_id)
 
         schedule_class_id = ScheduleClass.query\
                             .filter_by(week=week, day=day, time=time)\
                             .with_entities(ScheduleClass.class_id)
 
-        in_states = State.query.filter_by(classroom_id=classroom_id, class_id=schedule_class_id).all()
+        in_states = State.query.filter_by(classroom_id=classroom_id,
+                                          class_id=schedule_class_id).all()
 
-        answer = { "is_free" : False if in_states else True }
+        answer = {"is_free": False if in_states else True}
 
         return jsonify(answer)
 
@@ -103,13 +102,13 @@ class ClassroomAPI(Resource):
         return classrooms.all()
 
     def _filter_by_schedule_class(self, schedule_class, classrooms):
-            week, day, time = map(int, schedule_class.split(','))
+        week, day, time = map(int, schedule_class.split(','))
 
-            schedule_class = ScheduleClass.query\
-                                .filter_by(week=week, day=day, time=time)\
-                                .with_entities(ScheduleClass.class_id)
+        schedule_class = ScheduleClass.query\
+                         .filter_by(week=week, day=day, time=time)\
+                         .with_entities(ScheduleClass.class_id)
 
-            occupied_classrooms_ids = State.query.filter_by(class_id=schedule_class).with_entities(State.classroom_id)
+        occupied_classrooms_ids = State.query.filter_by(class_id=schedule_class)\
+                                  .with_entities(State.classroom_id)
 
-            return classrooms.filter(Classroom.classroom_id.not_in(occupied_classrooms_ids))
-
+        return classrooms.filter(Classroom.classroom_id.not_in(occupied_classrooms_ids))
