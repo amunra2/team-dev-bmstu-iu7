@@ -1,0 +1,32 @@
+Post class
+---
+tags:
+  - Classes
+parameters:
+  - in: body
+    name: body
+    required: true
+    schema:
+      id: Class
+      required:
+        - week 
+        - day
+        - time
+      properties:
+        week:
+          type: integer 
+          description: Class week
+          default: 0
+        day:
+          type: integer
+          description: Class day
+          default: 0
+        time:
+          type: integer 
+          description: Class time
+          default: 0
+responses:
+  200:
+    description: 
+    schema:
+      $ref: '#/definitions/Class'

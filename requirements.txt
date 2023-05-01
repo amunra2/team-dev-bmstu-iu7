@@ -1,21 +1,31 @@
 # Linter
-flake8
-flake8-bugbear
-flake8-builtins
-flake8-commas
-flake8-import-order
-pep8-naming
-pycodestyle
+flake8==6.0.0
+flake8-bugbear==23.3.23
+flake8-builtins==2.1.0
+flake8-commas==2.1.0
+flake8-import-order==0.18.2
+pep8-naming==0.13.3
+pycodestyle==2.10.0
 
 # Backend
-flask
-flask_migrate
-flask_sqlalchemy
-sqlalchemy
-waitress
+alembic==1.10.4
+flasgger==0.9.5
+Flask==2.2.3
+Flask_Migrate==4.0.4
+Flask_RESTful==0.3.9
+flask_sqlalchemy==3.0.3
+marshmallow_sqlalchemy==0.29.0
+SQLAlchemy==2.0.10
+waitress==2.1.2
+
+# Synchronization
+Requests==2.29.0
 
 # Telegram Bot Control
-pytelegrambotapi
+pyTelegramBotAPI==4.11.0
 
 # .end variables
-python-dotenv
+python-dotenv==1.0.0
+
+# Schedule
+schedule==1.2.0

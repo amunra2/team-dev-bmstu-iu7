@@ -1,11 +1,19 @@
 import logging
 import os
+from threading import Thread
 
 from dotenv import load_dotenv
+
+import requests
+
+import schedule
+
+from sync.sync import sync_data
 
 import telebot as tb
 import telebot.types as tbt
 
+from utils.get_full_lesson_data import get_full_lesson_data
 from utils.get_json_data import get_data_from_json
 from utils.get_logger import get_logger
 
@@ -96,12 +104,13 @@ class TelegramBotEmptyAudienceBMSTU:
                 return
 
             data_string = call.data.split(":")
-            self.data_users[user_id].update({data_string[KEY]: data_string[VALUE]})
+            lesson = get_full_lesson_data(data_string[VALUE])
+            self.data_users[user_id].update({data_string[KEY]: lesson})
 
             if (self.data_users[user_id]["MODE"] == "FIND_EMPTY_AUDIENCE"):
                 self.select_level(self.data_users[user_id]["MODE"], user_id)
             else:
-                self.select_audience(call, self.data_users[user_id]["MODE"])
+                self.select_audience(call.message, self.data_users[user_id]["MODE"])
 
         @self.bot.callback_query_handler(func=lambda call: call.data.startswith("LEVEL"))
         def save_level_handler(call: tbt.CallbackQuery):
@@ -134,6 +143,7 @@ class TelegramBotEmptyAudienceBMSTU:
                                       f"{self.bot_messages[mode]} `{string}`",
                                       parse_mode=PARSE_MODE)
 
+            self.show_empty_audiences(self.data_users[user_id], user_id)
             self.data_users.pop(user_id)
 
         @self.bot.message_handler(func=lambda message: True,
@@ -148,6 +158,78 @@ class TelegramBotEmptyAudienceBMSTU:
             self.init_command_process(message)
 
         logger.info("Бот запущен")
+
+    def show_empty_audiences(self, user_data: dict, user_id: int):
+        """
+            Функция выводит результат поиска свободных аудиторий.
+            Информация получается через запрос в БД.
+        """
+        try:
+            request_params = {"building": user_data["BUILDING"],
+                              "floor": user_data["LEVEL"],
+                              "class": user_data["LESSON"]}
+
+            url = os.getenv("DATA_URL") + "classrooms"
+            response = requests.get(url, params=request_params)
+
+            if (response.status_code != 200):
+                raise Exception(f"Request status code {response.status_code}: {response.reason}")
+
+            free_audiences = response.json()
+            free_audiences_str = ""
+
+            if (not free_audiences):
+                message = bot_messages_json[user_data['MODE']] + \
+                          bot_messages_json['EMPTY_AUDIENCES_NOT_FOUND']
+            else:
+                for audience in free_audiences:
+                    free_audiences_str += f"\n \\- `{audience['number']}`"
+
+                message = bot_messages_json[user_data['MODE']] + \
+                    bot_messages_json['EMPTY_AUDIENCES_FOUND'] + \
+                    free_audiences_str
+
+            self.bot.send_message(user_id, message, parse_mode=PARSE_MODE)
+        except Exception as exception:
+            logger.warning(exception)
+            self.bot.send_message(user_id,
+                                  self.bot_messages[user_data['MODE']] +
+                                  self.bot_messages["FIND_EMPTY_FAILED"],
+                                  parse_mode=PARSE_MODE)
+
+    def show_is_empty_audience(self, user_data: dict, user_id: int):
+        """
+            Функция выводит результат проверки "свободности" аудитории.
+            Информация получается через запрос в БД.
+        """
+        try:
+            request_params = {"is_free": "true",
+                              "building": user_data["BUILDING"],
+                              "class": user_data["LESSON"],
+                              "number": user_data["AUDIENCE"]}
+
+            url = os.getenv("DATA_URL") + "classrooms"
+            response = requests.get(url, params=request_params)
+
+            if (response.status_code != 200):
+                raise Exception(f"Request status code {response.status_code}: {response.reason}")
+
+            result: dict = response.json()
+
+            if (result['is_free']):
+                message = bot_messages_json[user_data['MODE']] + \
+                          bot_messages_json['IS_EMPTY_YES']
+            else:
+                message = bot_messages_json[user_data['MODE']] + \
+                          bot_messages_json['IS_EMPTY_NO']
+
+            self.bot.send_message(user_id, message, parse_mode=PARSE_MODE)
+        except Exception as exception:
+            logger.warning(exception)
+            self.bot.send_message(user_id,
+                                  self.bot_messages[user_data['MODE']] +
+                                  self.bot_messages["FIND_EMPTY_FAILED"],
+                                  parse_mode=PARSE_MODE)
 
     def is_user_comebacked(self, user_id: int, stage: str):
         """
@@ -220,18 +302,22 @@ class TelegramBotEmptyAudienceBMSTU:
                               parse_mode=PARSE_MODE,
                               reply_markup=keyboard)
 
-    def select_audience(self, call: tbt.CallbackQuery, command_text: str):
+    def select_audience(self, message: tbt.Message, command_text: str, error: str = ""):
         """
             Функция просит пользователя ввести номер аудитории в определенном формате
         """
-        message = self.bot.send_message(call.message.chat.id,
+        message = self.bot.send_message(message.chat.id,
                                         self.bot_messages[command_text] +
-                                        self.bot_messages["CHOOSE_AUDIENCE"],
+                                        error +
+                                        self.bot_messages['CHOOSE_AUDIENCE'],
                                         parse_mode=PARSE_MODE)
 
-        self.bot.register_next_step_handler(message, self.save_audience, message.message_id)
+        self.bot.register_next_step_handler(message,
+                                            self.save_audience,
+                                            message_id_to_delete=message.message_id,
+                                            command_text=command_text)
 
-    def save_audience(self, message: tbt.Message, message_id_to_delete: int):
+    def save_audience(self, message: tbt.Message, message_id_to_delete: int, command_text: str):
         """
             Функция сохраняет информацию о введеном номере аудитории
         """
@@ -255,6 +341,7 @@ class TelegramBotEmptyAudienceBMSTU:
                                   f"{self.bot_messages[mode]} `{string}`",
                                   parse_mode=PARSE_MODE)
 
+        self.show_is_empty_audience(self.data_users[user_id], user_id)
         self.data_users.pop(user_id)
 
     def delete_stage_messages(self, chat_id: int, message_ids: list[int]):
@@ -276,9 +363,16 @@ class TelegramBotEmptyAudienceBMSTU:
 
     def run(self):
         """
-            Запускает цикл работы бота
+            Запускает цикл работы бота и синхронизацию данных БД
         """
+        Thread(target=schedule_checker).start()
+        schedule.every().monday.do(sync_data)
         self.bot.infinity_polling()
+
+
+def schedule_checker():
+    while True:
+        schedule.run_pending()
 
 
 if __name__ == "__main__":

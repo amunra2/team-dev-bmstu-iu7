@@ -1,0 +1,19 @@
+Get classrooms list
+---
+tags:
+  - Classrooms
+parameters:
+  - in: query
+    name: fields
+    description: fields of classroom entity
+    required: false
+    schema:
+      type: array
+      items:
+        type: string
+    style: form
+responses:
+  200:
+    description: Classrooms found
+  404:
+    description: Not found

@@ -1,0 +1,18 @@
+Post state
+---
+tags:
+  - States 
+parameters:
+  - in: path
+    name: classroom_id
+    required: true
+    type: integer
+    description: Classroom ID
+  - in: path
+    name: class_id
+    required: true
+    type: integer
+    description: Class ID
+responses:
+  200:
+    description: State posted
