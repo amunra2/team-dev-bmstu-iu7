@@ -219,8 +219,7 @@ def add_entities(logger: logging.Logger, classroom, schedule_class):
 
     try:
         classroom_id = requests.post(url + "classrooms", json=classroom)
-        class_id = requests.post(url + + "schedule_classes",
-                                 json=schedule_class)
+        class_id = requests.post(url + + "classes", json=schedule_class)
 
         state = {"classroom_id": classroom_id,
                  "class_id": class_id}

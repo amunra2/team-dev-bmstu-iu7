@@ -17,7 +17,7 @@ def delete_data(logger: logging.Logger):
         r = requests.delete(url + "classrooms")
         r.raise_for_status()
 
-        r = requests.delete(url + "schedule_classes")
+        r = requests.delete(url + "classes")
         r.raise_for_status()
     except requests.exceptions.HTTPError as errh:
         logging.critical("Неудачный запрос:", errh)
