@@ -232,12 +232,13 @@ def add_entities(logger: logging.Logger, classroom, schedule_class):
     url = os.getenv("DATA_URL")
 
     try:
-        classroom_id = requests.post(url + "classrooms", json=classroom)
-        class_id = requests.post(url + "classes", json=schedule_class)
+        created_classroom = requests.post(url + "classrooms", json=classroom)
+        classroom_id = created_classroom.json()['classroom_id']
 
-        state = {"classroom_id": classroom_id,
-                 "class_id": class_id}
-        requests.post(url + "states", state)
+        created_class = requests.post(url + "classes", json=schedule_class)
+        class_id = created_class.json()['class_id']
+
+        requests.post(f'{url}/classrooms/{classroom_id}/classes/{class_id}')
     except requests.exceptions.HTTPError as errh:
         logging.critical("Неудачный запрос:", errh)
         return ReturnCode.fail
