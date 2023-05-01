@@ -175,11 +175,10 @@ class TelegramBotEmptyAudienceBMSTU:
             if (response.status_code != 200):
                 raise Exception(f"Request status code {response.status_code}: {response.reason}")
 
-            result: dict = response.json()
-            free_audiences = result["data"]
+            free_audiences = response.json()
             free_audiences_str = ""
 
-            if (free_audiences is None):
+            if (not free_audiences):
                 message = bot_messages_json[user_data['MODE']] + \
                           bot_messages_json['EMPTY_AUDIENCES_NOT_FOUND']
             else:
@@ -206,7 +205,7 @@ class TelegramBotEmptyAudienceBMSTU:
         try:
             request_params = {"is_free": "true",
                               "building": user_data["BUILDING"],
-                              "class": user_data["LEVEL"],
+                              "class": user_data["LESSON"],
                               "number": user_data["AUDIENCE"]}
 
             url = os.getenv("DATA_URL") + "classrooms"
@@ -217,7 +216,7 @@ class TelegramBotEmptyAudienceBMSTU:
 
             result: dict = response.json()
 
-            if (result['isFree'] == "true"):
+            if (result['is_free']):
                 message = bot_messages_json[user_data['MODE']] + \
                           bot_messages_json['IS_EMPTY_YES']
             else:
