@@ -1,0 +1,7 @@
+Delete all classrooms
+---
+tags:
+  - Classrooms
+responses:
+  200:
+    description:  All classrooms deleted

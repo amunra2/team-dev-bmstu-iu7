@@ -9,7 +9,7 @@ class ScheduleClass(db.Model):
     day = db.Column(db.Integer)
     time = db.Column(db.Integer)
 
-    states = db.relationship("State", back_populates="schedule_class")
+    states = db.relationship("State", back_populates="schedule_class", cascade="delete")
 
     def __repr__(self):
         return (

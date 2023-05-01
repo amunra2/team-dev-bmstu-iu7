@@ -1,0 +1,19 @@
+Get class by id
+---
+tags:
+  - Classes
+parameters:
+  - in: query
+    name: fields
+    description: fields of class entity
+    required: false
+    schema:
+      type: array
+      items:
+        type: string
+    style: form
+responses:
+  200:
+    description: Class found
+  404:
+    description: Not found

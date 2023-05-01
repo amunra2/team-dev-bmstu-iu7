@@ -5,15 +5,15 @@ class State(db.Model):
     __tablename__ = "states"
 
     classroom_id = db.Column(db.Integer,
-                             db.ForeignKey("classrooms.classroom_id"),
+                             db.ForeignKey("classrooms.classroom_id", ondelete="CASCADE"),
                              primary_key=True)
     class_id = db.Column(db.Integer,
-                         db.ForeignKey("classes.class_id"),
+                         db.ForeignKey("classes.class_id", ondelete="CASCADE"),
                          primary_key=True)
-    state = db.Column(db.Boolean)
+    state = db.Column(db.Boolean, default=False)
 
-    classroom = db.relationship("Classroom", back_populates="states")
-    schedule_class = db.relationship("ScheduleClass", back_populates="states")
+    classroom = db.relationship("Classroom", back_populates="states", cascade="delete")
+    schedule_class = db.relationship("ScheduleClass", back_populates="states", cascade="delete")
 
     def __repr__(self):
         str_state = "FREE" if self.state else "OCCUPIED"
