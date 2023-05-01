@@ -1,19 +1,19 @@
 from dotenv import load_dotenv
 
+from flasgger import Swagger
+
 from flask import Flask
 
 from flask_migrate import Migrate
 
 from flask_restful import Api
 
-from flasgger import Swagger
-
 from sqlalchemy import text
 
 from database import db, init_db
 
-from resources.classroom_api import ClassroomAPI
 from resources.class_api import ClassAPI
+from resources.classroom_api import ClassroomAPI
 from resources.state_api import StateAPI
 
 app = Flask(__name__)
@@ -28,9 +28,11 @@ api.add_resource(ClassroomAPI, "/classrooms", endpoint="classrooms_get_all")
 api.add_resource(ClassroomAPI, "/classrooms/<int:classroom_id>", endpoint="classrooms_get_by_id")
 api.add_resource(ClassAPI, "/classes", endpoint="classes_get_all")
 api.add_resource(ClassAPI, "/classes/<int:class_id>", endpoint="classes_get_by_id")
-api.add_resource(StateAPI, "/classrooms/<int:classroom_id>/classes/<int:class_id>", endpoint="states")
+api.add_resource(StateAPI, "/classrooms/<int:classroom_id>/classes/<int:class_id>",
+                 endpoint="states")
 
 swagger = Swagger(app)
+
 
 @app.route('/')
 def test_db():
