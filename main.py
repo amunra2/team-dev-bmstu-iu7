@@ -131,12 +131,13 @@ class TelegramBotEmptyAudienceBMSTU:
             data_string = call.data.split(":")
             self.data_users[user_id].update({data_string[KEY]: data_string[VALUE]})
 
-            if (logger.level <= logging.INFO):
+            logger.info(f"user_id = {user_id}: {self.data_users[user_id]}")
+
+            if (logger.level <= logging.DEBUG):
                 items = self.data_users[user_id].items()
                 string = "{\n" + \
                          "".join([f'  {key}: {value},\n' for key, value in items]) + \
                          "}"
-                logger.info(string.replace("\n", "").replace("  ", " "))
 
                 mode = self.data_users[user_id]['MODE']
                 self.bot.send_message(user_id,
@@ -329,12 +330,13 @@ class TelegramBotEmptyAudienceBMSTU:
 
         self.data_users[user_id].update({"AUDIENCE": message.text})
 
-        if (logger.level <= logging.INFO):
+        logger.info(f"user_id = {user_id}: {self.data_users[user_id]}")
+
+        if (logger.level <= logging.DEBUG):
             items = self.data_users[user_id].items()
             string = "{\n" + \
                      "".join([f'  {key}: {value},\n' for key, value in items]) + \
                      "}"
-            logger.info(string.replace("\n", "").replace("  ", " "))
 
             mode = self.data_users[user_id]['MODE']
             self.bot.send_message(user_id,
