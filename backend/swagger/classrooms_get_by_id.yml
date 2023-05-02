@@ -1,19 +1,25 @@
-Get classroom by id
+Получение аудитории по id
 ---
 tags:
   - Classrooms
 parameters:
+  - in: path
+    name: classroom_id
+    required: true
+    type: integer
+    description: ID аудитории
   - in: query
     name: fields
-    description: fields of classroom entity
+    description: выбираемые поля сущности аудитории
     required: false
-    schema:
-      type: array
-      items:
-        type: string
+    type: array
+    items:
+      type: string
     style: form
 responses:
   200:
-    description: Classroom found
+    description: Аудитория найдена
+    schema:
+      $ref: '#/definitions/Classroom'
   404:
-    description: Not found
+    description: Неверный запрос
