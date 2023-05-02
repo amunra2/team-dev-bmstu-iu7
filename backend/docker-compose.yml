@@ -13,13 +13,5 @@ services:
     ports:
       - "5432:5432"
 
-  bot:
-    build:
-      context: "."
-      dockerfile: Dockerfile
-    volumes:
-      - ".:/bot"
-    restart: always
-
 volumes:
   bmstu-data:
