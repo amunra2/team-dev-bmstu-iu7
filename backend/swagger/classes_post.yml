@@ -1,4 +1,4 @@
-Post class
+Добавление новой пары
 ---
 tags:
   - Classes
@@ -15,18 +15,15 @@ parameters:
       properties:
         week:
           type: integer 
-          description: Class week
-          default: 0
+          description: неделя пары
         day:
           type: integer
-          description: Class day
-          default: 0
+          description: день пары
         time:
           type: integer 
-          description: Class time
-          default: 0
+          description: время пары
 responses:
   200:
-    description: 
+    description: пара добавлена
     schema:
       $ref: '#/definitions/Class'

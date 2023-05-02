@@ -16,6 +16,7 @@ from resources.class_api import ClassAPI
 from resources.classroom_api import ClassroomAPI
 from resources.state_api import StateAPI
 
+
 app = Flask(__name__)
 app.url_map.strict_slashes = False
 app.config['JSON_AS_ASCII'] = False
@@ -31,6 +32,7 @@ api.add_resource(ClassAPI, "/classes/<int:class_id>", endpoint="classes_get_by_i
 api.add_resource(StateAPI, "/classrooms/<int:classroom_id>/classes/<int:class_id>",
                  endpoint="states")
 
+app.config['SWAGGER'] = {'title': 'BMSTU FREE API'}
 swagger = Swagger(app)
 
 
@@ -47,4 +49,4 @@ if __name__ == "__main__":
     load_dotenv()
 
     from waitress import serve
-    serve(app, host="0.0.0.0", port=5050)
+    serve(app, host="0.0.0.0", port=5000)

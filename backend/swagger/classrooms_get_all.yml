@@ -1,19 +1,49 @@
-Get classrooms list
+Получение списка аудиторий
 ---
 tags:
   - Classrooms
 parameters:
   - in: query
     name: fields
-    description: fields of classroom entity
+    description: выбираемые поля сущности аудитории
     required: false
+    type: array
+    items:
+      type: string
+    style: form
+  - in: query
+    name: building
+    description: корпус аудитории
+    required: false
+    type: string
+    enum: [GZ, ULK, ENERGO, SM]
+  - in: query
+    name: floor
+    description: этаж аудитории
+    required: false
+    type: integer
+  - in: query
+    name: class
+    description: пара (в формате week,day,time)
+    required: false
+    type: string
+    pattern: '^\d{1},\d{1},\d{1}$'
+  - in: query
+    name: is_free
+    description: режим проверки свободности аудитории
+    required: false
+    type: boolean
+  - in: query
+    name: number
+    description: номер аудитории
+    required: false
+    type: string
+responses:
+  200:
+    description: Аудитории найдены
     schema:
       type: array
       items:
-        type: string
-    style: form
-responses:
-  200:
-    description: Classrooms found
+        $ref: '#/definitions/Classroom'
   404:
-    description: Not found
+    description: Неверный запрос
