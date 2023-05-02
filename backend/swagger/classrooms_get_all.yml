@@ -12,11 +12,6 @@ parameters:
       type: string
     style: form
   - in: query
-    name: is_free
-    description: режим проверки свободности аудитории
-    required: false
-    type: boolean
-  - in: query
     name: building
     description: корпус аудитории
     required: false
@@ -33,6 +28,16 @@ parameters:
     required: false
     type: string
     pattern: '^\d{1},\d{1},\d{1}$'
+  - in: query
+    name: is_free
+    description: режим проверки свободности аудитории
+    required: false
+    type: boolean
+  - in: query
+    name: number
+    description: номер аудитории
+    required: false
+    type: string
 responses:
   200:
     description: Аудитории найдены
