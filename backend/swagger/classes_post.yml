@@ -16,17 +16,14 @@ parameters:
         week:
           type: integer 
           description: неделя пары
-          default: 0
         day:
           type: integer
           description: день пары
-          default: 0
         time:
           type: integer 
           description: время пары
-          default: 0
 responses:
   200:
-    description: 
+    description: пара добавлена
     schema:
       $ref: '#/definitions/Class'

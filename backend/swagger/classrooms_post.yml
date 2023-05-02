@@ -24,6 +24,6 @@ parameters:
           description: номер аудитории
 responses:
   200:
-    description: 
+    description: аудитория добавлена
     schema:
       $ref: '#/definitions/Classroom'
