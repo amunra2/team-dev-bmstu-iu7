@@ -37,7 +37,9 @@ def create_app(db_connection=None):
     api.add_resource(StateAPI, "/classrooms/<int:classroom_id>/classes/<int:class_id>",
                      endpoint="states")
 
+    app.config['SWAGGER'] = {'title': 'BMSTU FREE API'}
     Swagger(app)
+
 
     @app.route('/')
     def test_db():

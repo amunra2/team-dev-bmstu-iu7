@@ -1,19 +1,25 @@
-Get class by id
+Получение пары по id
 ---
 tags:
   - Classes
 parameters:
+  - in: path
+    name: class_id
+    required: true
+    type: integer
+    description: ID пары
   - in: query
     name: fields
-    description: fields of class entity
+    description: выбираемые поля сущности пары
     required: false
-    schema:
-      type: array
-      items:
-        type: string
+    type: array
+    items:
+      type: string
     style: form
 responses:
   200:
-    description: Class found
+    description: Пара найдена
+    schema:
+      $ref: '#/definitions/Class'
   404:
-    description: Not found
+    description: Неверный запрос

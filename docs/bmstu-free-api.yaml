@@ -1,0 +1,292 @@
+definitions:
+  Class:
+    properties:
+      day:
+        description: день пары
+        type: integer
+      time:
+        description: время пары
+        type: integer
+      week:
+        description: неделя пары
+        type: integer
+    required:
+      - week
+      - day
+      - time
+  Classroom:
+    properties:
+      building:
+        description: корпус аудитории
+        type: string
+      floor:
+        description: этаж аудитории
+        type: integer
+      number:
+        description: номер аудитории
+        type: string
+    required:
+      - building
+      - floor
+      - number
+  State:
+    properties:
+      class_id:
+        description: ID пары
+        type: integer
+      classroom_id:
+        description: ID аудитории
+        type: integer
+      state:
+        description: состояние
+        type: integer
+    required:
+      - classroom_id
+      - class_id
+      - state
+info:
+  description: powered by Flasgger
+  termsOfService: /tos
+  title: BMSTU FREE API
+  version: 0.0.1
+paths:
+  /classes:
+    delete:
+      responses:
+        '200':
+          description: Все пары удалены
+          schema:
+            properties:
+              deleted_number:
+                description: Количество удаленных записей пар
+                example: 5
+                type: integer
+      summary: Удаление всех пар
+      tags:
+        - Classes
+    get:
+      parameters:
+        - description: выбираемые поля сущности пары
+          in: query
+          items:
+            type: string
+          name: fields
+          required: false
+          style: form
+          type: array
+        - description: неделя пары (0 - чс, 1 - зн)
+          enum:
+            - 0
+            - 1
+          in: query
+          name: week
+          required: false
+          type: integer
+        - description: день пары (0 - пн, 1 - вт, ...)
+          enum:
+            - 0
+            - 1
+            - 2
+            - 3
+            - 4
+            - 5
+          in: query
+          name: day
+          required: false
+          type: integer
+        - description: время пары (0 - 8:30, 1 - 10:15, ...)
+          enum:
+            - 0
+            - 1
+            - 2
+            - 3
+            - 4
+            - 5
+            - 6
+          in: query
+          name: time
+          required: false
+          type: integer
+      responses:
+        '200':
+          description: Пары найдены
+          schema:
+            items:
+              $ref: '#/definitions/Class'
+            type: array
+        '404':
+          description: Неверный запрос
+      summary: Получение списка пар
+      tags:
+        - Classes
+    post:
+      parameters:
+        - in: body
+          name: body
+          required: true
+          schema:
+            $ref: '#/definitions/Class'
+      responses:
+        '200':
+          description: пара добавлена
+          schema:
+            $ref: '#/definitions/Class'
+      summary: Добавление новой пары
+      tags:
+        - Classes
+  /classes/{class_id}:
+    get:
+      parameters:
+        - description: ID пары
+          in: path
+          name: class_id
+          required: true
+          type: integer
+        - description: выбираемые поля сущности пары
+          in: query
+          items:
+            type: string
+          name: fields
+          required: false
+          style: form
+          type: array
+      responses:
+        '200':
+          description: Пара найдена
+          schema:
+            $ref: '#/definitions/Class'
+        '404':
+          description: Неверный запрос
+      summary: Получение пары по id
+      tags:
+        - Classes
+  /classrooms:
+    delete:
+      responses:
+        '200':
+          description: Все аудитории удалены
+          schema:
+            properties:
+              deleted_number:
+                description: Количество удаленных записей аудиторий
+                example: 5
+                type: integer
+      summary: Удаление всех аудиторий
+      tags:
+        - Classrooms
+    get:
+      parameters:
+        - description: выбираемые поля сущности аудитории
+          in: query
+          items:
+            type: string
+          name: fields
+          required: false
+          style: form
+          type: array
+        - description: корпус аудитории
+          enum:
+            - GZ
+            - ULK
+            - ENERGO
+            - SM
+          in: query
+          name: building
+          required: false
+          type: string
+        - description: этаж аудитории
+          in: query
+          name: floor
+          required: false
+          type: integer
+        - description: пара (в формате week,day,time)
+          in: query
+          name: class
+          pattern: ^\d{1},\d{1},\d{1}$
+          required: false
+          type: string
+        - description: режим проверки свободности аудитории
+          in: query
+          name: is_free
+          required: false
+          type: boolean
+        - description: номер аудитории
+          in: query
+          name: number
+          required: false
+          type: string
+      responses:
+        '200':
+          description: Аудитории найдены
+          schema:
+            items:
+              $ref: '#/definitions/Classroom'
+            type: array
+        '404':
+          description: Неверный запрос
+      summary: Получение списка аудиторий
+      tags:
+        - Classrooms
+    post:
+      parameters:
+        - in: body
+          name: body
+          required: true
+          schema:
+            $ref: '#/definitions/Classroom'
+      responses:
+        '200':
+          description: аудитория добавлена
+          schema:
+            $ref: '#/definitions/Classroom'
+      summary: Добавление новой аудитории
+      tags:
+        - Classrooms
+  /classrooms/{classroom_id}:
+    get:
+      parameters:
+        - description: ID аудитории
+          in: path
+          name: classroom_id
+          required: true
+          type: integer
+        - description: выбираемые поля сущности аудитории
+          in: query
+          items:
+            type: string
+          name: fields
+          required: false
+          style: form
+          type: array
+      responses:
+        '200':
+          description: Аудитория найдена
+          schema:
+            $ref: '#/definitions/Classroom'
+        '404':
+          description: Неверный запрос
+      summary: Получение аудитории по id
+      tags:
+        - Classrooms
+  /classrooms/{classroom_id}/classes/{class_id}:
+    post:
+      parameters:
+        - description: ID аудитории
+          in: path
+          name: classroom_id
+          required: true
+          type: integer
+        - description: ID пары
+          in: path
+          name: class_id
+          required: true
+          type: integer
+      responses:
+        '200':
+          description: состояние добавлено
+          schema:
+            $ref: '#/definitions/State'
+      summary: Добавление состояния аудитории
+      tags:
+        - States
+swagger: '2.0'

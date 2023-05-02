@@ -1,7 +1,13 @@
-Delete all classrooms
+Удаление всех аудиторий
 ---
 tags:
   - Classrooms
 responses:
   200:
-    description:  All classrooms deleted
+    description: Все аудитории удалены
+    schema:
+      properties:
+        deleted_number:
+          type: integer
+          example: 5
+          description: Количество удаленных записей аудиторий
