@@ -1,5 +1,6 @@
 import os
 import sqlite3 as sl
+from os.path import exists
 
 
 DB_NAME = "test.db"
@@ -122,5 +123,9 @@ def create_test_db(db):
 
 
 if __name__ == "__main__":
-    os.remove(DB_NAME)
+    db = DB_NAME
+
+    if exists(db):
+        os.remove(DB_NAME)
+
     create_test_db(DB_NAME)
