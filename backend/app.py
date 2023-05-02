@@ -40,7 +40,6 @@ def create_app(db_connection=None):
     app.config['SWAGGER'] = {'title': 'BMSTU FREE API'}
     Swagger(app)
 
-
     @app.route('/')
     def test_db():
         try:
