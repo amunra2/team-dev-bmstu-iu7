@@ -1,4 +1,4 @@
-Post state
+Добавление состояния аудитории
 ---
 tags:
   - States 
@@ -7,12 +7,28 @@ parameters:
     name: classroom_id
     required: true
     type: integer
-    description: Classroom ID
+    description: ID аудитории
   - in: path
     name: class_id
     required: true
     type: integer
-    description: Class ID
+    description: ID пары
 responses:
   200:
-    description: State posted
+    description: состояние добавлено
+    schema:
+      id: State
+      required:
+        - classroom_id
+        - class_id
+        - state
+      properties:
+        classroom_id:
+          type: integer
+          description: ID аудитории
+        class_id:
+          type: integer
+          description: ID пары
+        state:
+          type: integer
+          description: состояние
