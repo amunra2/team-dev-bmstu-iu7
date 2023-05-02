@@ -1,4 +1,4 @@
-Post class
+Добавление новой пары
 ---
 tags:
   - Classes
@@ -15,15 +15,15 @@ parameters:
       properties:
         week:
           type: integer 
-          description: Class week
+          description: неделя пары
           default: 0
         day:
           type: integer
-          description: Class day
+          description: день пары
           default: 0
         time:
           type: integer 
-          description: Class time
+          description: время пары
           default: 0
 responses:
   200:
