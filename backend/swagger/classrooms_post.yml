@@ -1,4 +1,4 @@
-post endpoint
+Добавление новой аудитории
 ---
 tags:
   - Classrooms
@@ -15,16 +15,13 @@ parameters:
       properties:
         building:
           type: string
-          description: Classroom builing
-          default: "ULK"
+          description: корпус аудитории
         floor:
           type: integer
-          description: Classroom floor
-          default: 1
+          description: этаж аудитории
         number:
           type: string
-          description: Classroom number
-          default: "111л"
+          description: номер аудитории
 responses:
   200:
     description: 
