@@ -1,6 +1,8 @@
 name: Python API test
 
 on: [push, pull_request]
+env: 
+  PYTHONPATH: /home/runner/work/team-dev-bmstu-iu7/team-dev-bmstu-iu7/backend:${PYTHONPATH}
 
 jobs:
   api-test:
@@ -16,12 +18,13 @@ jobs:
           python-version: "3.11"
 
       - name: Install requirements
-        env:
-          PYTHONPATH: /home/runner/work/team-dev-bmstu-iu7/team-dev-bmstu-iu7/backend:${PYTHONPATH}
         run: pip3 install -r requirements.txt
           
       - name: Create DB file for test
         run: python3 api_tests/test_db.py
+
+      - name: Env Variable Print
+        run: echo ${PYTHONPATH}
 
       # - name: Get folder path
       #   run: python3 -c "import os; print(os.path.abspath(os.curdir))"
