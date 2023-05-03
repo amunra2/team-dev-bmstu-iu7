@@ -1,0 +1,27 @@
+name: Python API test
+
+on: [push, pull_request]
+env: 
+  PYTHONPATH: "/home/runner/work/team-dev-bmstu-iu7/team-dev-bmstu-iu7/backend:"
+
+jobs:
+  api-test:
+    runs-on: ubuntu-latest
+    name: Test
+    steps:
+      - name: Check out source repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python environment
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+
+      - name: Install requirements
+        run: pip3 install -r requirements.txt
+          
+      - name: Create DB file for test
+        run: python3 api_tests/test_db.py
+
+      - name: Run tests
+        run: pytest api_tests -p no:warnings -v
