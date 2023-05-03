@@ -24,4 +24,4 @@ jobs:
         run: python3 api_tests/test_db.py
 
       - name: Run tests
-        run: pytest api_tests
+        run: pytest api_tests -p no:warnings -v
