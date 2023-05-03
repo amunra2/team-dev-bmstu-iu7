@@ -2,7 +2,7 @@ name: Python API test
 
 on: [push, pull_request]
 env: 
-  PYTHONPATH: /home/runner/work/team-dev-bmstu-iu7/team-dev-bmstu-iu7/backend
+  PYTHONPATH: "/home/runner/work/team-dev-bmstu-iu7/team-dev-bmstu-iu7/backend:"
 
 jobs:
   api-test:
