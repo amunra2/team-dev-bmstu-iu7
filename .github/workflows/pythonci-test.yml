@@ -21,10 +21,10 @@ jobs:
       - name: Create DB file for test
         run: python3 api_tests/test_db.py
 
-      - name: Get folder path
-        run: python3 -c "import os; print(os.path.abspath(os.curdir))"
+      # - name: Get folder path
+      #   run: python3 -c "import os; print(os.path.abspath(os.curdir))"
 
-      # - name: Run tests
-      #   # env:
-      #   #   PYTHONPATH~/study/sem8/team-dev/team-dev-bmstu/backend:${PYTHONPATH}
-      #   run: pytest api_tests
+      - name: Run tests
+        env:
+          PYTHONPATH: /home/runner/work/team-dev-bmstu-iu7/team-dev-bmstu-iu7/backend:${PYTHONPATH}
+        run: pytest api_tests
