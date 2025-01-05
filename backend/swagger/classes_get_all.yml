@@ -1,0 +1,40 @@
+Получение списка пар
+---
+tags:
+  - Classes
+parameters:
+  - in: query
+    name: fields
+    description: выбираемые поля сущности пары
+    required: false
+    type: array
+    items:
+      type: string
+    style: form
+  - in: query
+    name: week
+    description: неделя пары (0 - чс, 1 - зн)
+    required: false
+    type: integer
+    enum: [0, 1]
+  - in: query
+    name: day
+    description: день пары (0 - пн, 1 - вт, ...)
+    required: false
+    type: integer
+    enum: [0, 1, 2, 3, 4, 5]
+  - in: query
+    name: time
+    description: время пары (0 - 8:30, 1 - 10:15, ...)
+    required: false
+    type: integer
+    enum: [0, 1, 2, 3, 4, 5, 6]
+responses:
+  200:
+    description: Пары найдены
+    schema:
+      type: array
+      items:
+        $ref: '#/definitions/Class'
+  404:
+    description: Неверный запрос

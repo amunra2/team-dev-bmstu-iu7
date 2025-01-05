@@ -1,0 +1,25 @@
+Получение аудитории по id
+---
+tags:
+  - Classrooms
+parameters:
+  - in: path
+    name: classroom_id
+    required: true
+    type: integer
+    description: ID аудитории
+  - in: query
+    name: fields
+    description: выбираемые поля сущности аудитории
+    required: false
+    type: array
+    items:
+      type: string
+    style: form
+responses:
+  200:
+    description: Аудитория найдена
+    schema:
+      $ref: '#/definitions/Classroom'
+  404:
+    description: Неверный запрос

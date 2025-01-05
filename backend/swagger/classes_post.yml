@@ -1,0 +1,29 @@
+Добавление новой пары
+---
+tags:
+  - Classes
+parameters:
+  - in: body
+    name: body
+    required: true
+    schema:
+      id: Class
+      required:
+        - week 
+        - day
+        - time
+      properties:
+        week:
+          type: integer 
+          description: неделя пары
+        day:
+          type: integer
+          description: день пары
+        time:
+          type: integer 
+          description: время пары
+responses:
+  200:
+    description: пара добавлена
+    schema:
+      $ref: '#/definitions/Class'

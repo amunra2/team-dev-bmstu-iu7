@@ -1,0 +1,29 @@
+Добавление новой аудитории
+---
+tags:
+  - Classrooms
+parameters:
+  - in: body
+    name: body
+    required: true
+    schema:
+      id: Classroom
+      required:
+        - building 
+        - floor
+        - number
+      properties:
+        building:
+          type: string
+          description: корпус аудитории
+        floor:
+          type: integer
+          description: этаж аудитории
+        number:
+          type: string
+          description: номер аудитории
+responses:
+  200:
+    description: аудитория добавлена
+    schema:
+      $ref: '#/definitions/Classroom'

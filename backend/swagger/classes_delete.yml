@@ -1,0 +1,13 @@
+Удаление всех пар
+---
+tags:
+  - Classes
+responses:
+  200:
+    description: Все пары удалены
+    schema:
+      properties:
+        deleted_number:
+          type: integer
+          example: 5
+          description: Количество удаленных записей пар

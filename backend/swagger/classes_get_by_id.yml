@@ -1,0 +1,25 @@
+Получение пары по id
+---
+tags:
+  - Classes
+parameters:
+  - in: path
+    name: class_id
+    required: true
+    type: integer
+    description: ID пары
+  - in: query
+    name: fields
+    description: выбираемые поля сущности пары
+    required: false
+    type: array
+    items:
+      type: string
+    style: form
+responses:
+  200:
+    description: Пара найдена
+    schema:
+      $ref: '#/definitions/Class'
+  404:
+    description: Неверный запрос
